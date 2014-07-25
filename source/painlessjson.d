@@ -26,6 +26,7 @@ version( unittest ) {
 	class PointC {
 		double x = 0;
 		double y = 1;
+		this() {};
 		this( double x_, double y_ ) { x = x_; y = y_; }
 		string foo() { 
 			writeln( "Class functions should not be called" ); 
@@ -165,6 +166,10 @@ unittest {
 /// Convert from JSONValue to any other type
 T fromJSON( T )( JSONValue json ) {
 	T t;
+	static if ( __traits( compiles, cast(Object)(t) ) 
+			&& __traits( compiles, new T )) {
+		t = new T;
+  }	
 	static if ( isIntegral!T ) {
 		t = to!T(json.integer);
 	} else static if (isFloatingPoint!T) {
@@ -194,6 +199,7 @@ T fromJSON( T )( JSONValue json ) {
 		{
 			static if(
 					__traits(compiles, __traits(getMember, t, name))
+					&& __traits(compiles, typeof(__traits(getMember, t, name)))
 					//  Skip Functions 
 					&& !isSomeFunction!(__traits(getMember, t, name) )
 					) 
@@ -229,7 +235,7 @@ unittest {
 	}
 }
 
-/// Structs fromJSON
+/// Structs from JSON
 unittest {
 	auto p = fromJSON!Point( parseJSON( 
 				q{{"x":-1,"y":2}} ) );
@@ -250,6 +256,12 @@ unittest {
 				q{{"x":-1,"y":2,"z":3}} ) );
 	assert( p.x == -1 );
 	assert( p.y == 2 );
+}
 
-
+/// Class from JSON
+unittest {
+	auto p = fromJSON!PointC( parseJSON( 
+				q{{"x":-1,"y":2}} ) );
+	assert( p.x == -1 );
+	assert( p.y == 2 );
 }
