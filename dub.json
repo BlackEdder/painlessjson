@@ -1,0 +1,8 @@
+{
+	"name": "painlessjson",
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2014, edwin",
+	"authors": ["edwin"],
+	"dependencies": {
+	}
+}
