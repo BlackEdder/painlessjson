@@ -181,6 +181,13 @@ T fromJSON( T )( JSONValue json ) {
 			t = false;
 	} else static if ( isArray!T ) {
 		t = map!((js) => fromJSON!(typeof(t.front))(js))( json.array ).array;
+	} else static if ( isAssociativeArray!T ) {
+		JSONValue[string] jsonAA = json.object;
+		foreach( k, v; jsonAA ) {
+			t[fromJSON!(typeof(t.keys.front))(parseJSON(k))] =
+				fromJSON!(typeof(t.values.front))( v );
+		}
+		//t = map!((js) => fromJSON!(typeof(t.front))(js))( json.array ).array;
 	}
 	return t;
 }
@@ -198,4 +205,13 @@ unittest {
 /// Converting arrays
 unittest {
 	assert( equal( fromJSON!(int[])( toJSON( [1,2] ) ), [1,2] ) );
+}
+
+/// Associative arrays
+unittest {
+	string[int] aa = [ 0 : "a", 1 : "b" ];
+	auto aaCpy = fromJSON!(string[int])( toJSON( aa ) );
+	foreach( k, v; aa ) {
+		assert( aaCpy[k] == v );
+	}
 }
