@@ -40,9 +40,7 @@ JSONValue toJSON( T )( T object ) {
 		return JSONValue( object );
 	} else static if ( isArray!T ) { // Range
 		JSONValue[] jsonRange;
-		foreach ( el ; object ) {
-			jsonRange ~= el.toJSON;
-		}
+		jsonRange = map!( (el) => el.toJSON )(object).array;
 		return JSONValue(jsonRange);
 	} else static if ( isAssociativeArray!T ) { // Range
 		JSONValue[string] jsonAA; 
