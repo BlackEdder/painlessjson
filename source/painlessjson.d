@@ -9,14 +9,24 @@ version( unittest ) {
 		double x = 0;
 		double y = 1;
 		this( double x_, double y_ ) { x = x_; y = y_; }
-		string foo() { writeln( "I should not be called" ); return "Noooooo!"; }
+		string foo() { 
+			writeln( "Functions should not be called" );
+			return "Noooooo!";
+		}
+		static string bar() { 
+			writeln( "Static functions should not be called" ); 
+			return "Noooooo!"; 
+		}
 	}
 
 	class PointC {
 		double x = 0;
 		double y = 1;
 		this( double x_, double y_ ) { x = x_; y = y_; }
-		string foo() { writeln( "I should not be called" ); return "Noooooo!"; }
+		string foo() { 
+			writeln( "Class functions should not be called" ); 
+			return "Noooooo!"; 
+		}
 	}
 }
 
@@ -30,6 +40,12 @@ JSONValue toJSON( T )( T object ) {
 			jsonRange ~= el.toJSON;
 		}
 		return JSONValue(jsonRange);
+	} else static if ( isAssociativeArray!T ) { // Range
+		JSONValue[string] jsonAA; 
+		foreach ( key, value ; object ) {
+			jsonAA[ key.toJSON.toString ] = value.toJSON;
+		}
+		return JSONValue(jsonAA);
 	} else {
 		JSONValue[string] json;	
 
@@ -40,7 +56,7 @@ JSONValue toJSON( T )( T object ) {
 					__traits(compiles, __traits(getMember, object, name).toJSON)
 					//&& __traits(compiles, __traits(getMember, object, name)) 
 					//  Skip Functions 
-					&& !__traits(compiles, FunctionTypeOf!(__traits(getMember, object, name) ))
+					&& !isSomeFunction!(__traits(getMember, object, name) )
 					) 
 			{ // Can we get a value? (filters out void * this)
 				json[name] = __traits(getMember, object, name).toJSON;
@@ -76,14 +92,26 @@ unittest {
 	assert( toJSON( ps ).toString == q{[{"x":-1,"y":1},{"x":2,"y":3}]} );
 }
 
-
 /// User class
 unittest {
  	PointC p = new PointC( 0, 1 );
 	assert( toJSON( p ).toString == q{{"x":0,"y":1}} );
 }
+
 /// Array of classes
+unittest {
+ 	PointC[] ps = [ new PointC(-1,1), new PointC(2,3) ];
+	assert( toJSON( ps ).toString == q{[{"x":-1,"y":1},{"x":2,"y":3}]} );
+}
 
 /// Associative array
+unittest {
+	string[int] aa = [ 0 : "a", 1 : "b" ];
+	// In JSON (D) only string based associative arrays are supported, so:
+	assert( aa.toJSON.toString == q{{"0":"a","1":"b"}} );
+
+	Point[int] aaStruct = [ 0 : Point( -1,1 ), 1 : Point( 2,0 ) ];
+	assert( aaStruct.toJSON.toString == q{{"0":{"x":-1,"y":1},"1":{"x":2,"y":0}}} );
+}
 
 /// Overloaded toJSON
