@@ -187,7 +187,20 @@ T fromJSON( T )( JSONValue json ) {
 			t[fromJSON!(typeof(t.keys.front))(parseJSON(k))] =
 				fromJSON!(typeof(t.values.front))( v );
 		}
-		//t = map!((js) => fromJSON!(typeof(t.front))(js))( json.array ).array;
+	} else {
+		mixin("JSONValue[string] jsonAA = json.object;");
+
+		foreach (name; __traits(allMembers, T))
+		{
+			static if(
+					__traits(compiles, __traits(getMember, t, name))
+					//  Skip Functions 
+					&& !isSomeFunction!(__traits(getMember, t, name) )
+					) 
+			{ // Can we get a value? (filters out void * this)
+				mixin( "t." ~ name ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name))).stringof ~")(jsonAA[\"" ~ name ~ "\"]);" );
+			}
+		}	
 	}
 	return t;
 }
@@ -214,4 +227,14 @@ unittest {
 	foreach( k, v; aa ) {
 		assert( aaCpy[k] == v );
 	}
+}
+
+/// Custom types 
+///
+/// TODO More error checking
+unittest {
+	Point p = Point( -1, 2 );
+	auto pCpy = fromJSON!Point( toJSON( p ) );
+	assert( pCpy.x == -1 );
+	assert( pCpy.y == 2 );
 }
