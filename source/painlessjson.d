@@ -180,9 +180,7 @@ T fromJSON( T )( JSONValue json ) {
 		else
 			t = false;
 	} else static if ( isArray!T ) {
-		//t = map!((js) => to!int(js.integer))( json.array ).array;
-		pragma( msg, typeid(T) );
-		t = map!(fromJSON!(typeid(T))())( json ).array;
+		t = map!((js) => fromJSON!(typeof(t.front))(js))( json.array ).array;
 	}
 	return t;
 }
@@ -199,5 +197,5 @@ unittest {
 
 /// Converting arrays
 unittest {
-	//assert( equal( fromJSON!(int[])( toJSON( [1,2] ) ), [1,2] ) );
+	assert( equal( fromJSON!(int[])( toJSON( [1,2] ) ), [1,2] ) );
 }
