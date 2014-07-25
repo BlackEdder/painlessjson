@@ -198,7 +198,7 @@ T fromJSON( T )( JSONValue json ) {
 					&& !isSomeFunction!(__traits(getMember, t, name) )
 					) 
 			{ // Can we get a value? (filters out void * this)
-				mixin( "t." ~ name ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name))).stringof ~")(jsonAA[\"" ~ name ~ "\"]);" );
+				mixin( "if ( \"" ~ name ~ "\" in jsonAA) t." ~ name ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name))).stringof ~")(jsonAA[\"" ~ name ~ "\"]);" );
 			}
 		}	
 	}
@@ -229,12 +229,27 @@ unittest {
 	}
 }
 
-/// Custom types 
-///
-/// TODO More error checking
+/// Structs fromJSON
 unittest {
-	Point p = Point( -1, 2 );
-	auto pCpy = fromJSON!Point( toJSON( p ) );
-	assert( pCpy.x == -1 );
-	assert( pCpy.y == 2 );
+	auto p = fromJSON!Point( parseJSON( 
+				q{{"x":-1,"y":2}} ) );
+	assert( p.x == -1 );
+	assert( p.y == 2 );
+
+	p = fromJSON!Point( parseJSON( 
+				q{{"x":1}} ) );
+	assert( p.x == 1 );
+	assert( p.y == 1 );
+
+	p = fromJSON!Point( parseJSON( 
+				q{{"y":0}} ) );
+	assert( p.x == 0 );
+	assert( p.y == 0 );
+
+	p = fromJSON!Point( parseJSON( 
+				q{{"x":-1,"y":2,"z":3}} ) );
+	assert( p.x == -1 );
+	assert( p.y == 2 );
+
+
 }
