@@ -33,6 +33,40 @@ version( unittest ) {
 			return "Noooooo!"; 
 		}
 	}
+    
+    class PointPrivate {
+        private double _x;
+		private double _y;
+		this( double x_, double y_ ) { _x = x_; _y = y_; }
+		string foo() { 
+			writeln( "Class functions should not be called" ); 
+			return "Noooooo!"; 
+		}
+        
+        double x()
+        {
+            return _x;
+        }
+        
+        double y()
+        {
+            return _y;
+        }
+        
+        static PointPrivate _fromJSON(JSONValue value)
+        {
+            return new PointPrivate(fromJSON!double(value["x"]), fromJSON!double(value["y"]));
+        }
+        
+        JSONValue _toJSON()
+        {
+            JSONValue[string] json;
+            json["x"] = JSONValue(x);
+            json["y"] = JSONValue(y);
+            return JSONValue( json );
+        }
+        
+    }
 }
 
 /// Template function that converts any object to JSON
@@ -49,7 +83,11 @@ JSONValue toJSON( T )( T object ) {
 			jsonAA[ key.toJSON.toString ] = value.toJSON;
 		}
 		return JSONValue(jsonAA);
-	} else {
+	} else static if(
+        __traits(compiles,(T t) {return object._toJSON();}))
+    {
+        return object._toJSON();
+    } else {
 		JSONValue[string] json;	
 
 		// Getting all member variables (there is probably an easier way)
@@ -98,8 +136,14 @@ unittest {
 
 /// User class
 unittest {
- 	PointC p = new PointC( 0, 1 );
-	assert( toJSON( p ).toString == q{{"x":0,"y":1}} );
+ 	PointC p = new PointC( 1, -2 );
+	assert( toJSON( p ).toString == q{{"x":1,"y":-2}} );
+}
+
+/// User class with private fields
+unittest {
+ 	PointPrivate p = new PointPrivate( -1, 2 );
+	assert( toJSON( p ).toString == q{{"x":-1,"y":2}} );
 }
 
 /// Array of classes
@@ -183,6 +227,9 @@ T fromJSON( T )( JSONValue json ) {
             return true;
         else
             return false;
+    } else static if( __traits( compiles,{ return T._fromJSON(json);} ) )
+    {
+        return T._fromJSON(json);
     } else {
         T t;
         static if ( __traits( compiles, cast(Object)(t) )
@@ -268,6 +315,15 @@ unittest {
 /// Class from JSON
 unittest {
 	auto p = fromJSON!PointC( parseJSON( 
+				q{{"x":-1,"y":2}} ) );
+	assert( p.x == -1 );
+	assert( p.y == 2 );
+}
+
+
+/// Class from JSON using _fromJSON
+unittest {
+	auto p = fromJSON!PointPrivate( parseJSON( 
 				q{{"x":-1,"y":2}} ) );
 	assert( p.x == -1 );
 	assert( p.y == 2 );
