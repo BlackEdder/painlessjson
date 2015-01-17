@@ -76,6 +76,7 @@ unittest {
 	assert( 4.toJSON != JSONValue( 5 ) );
 	assert( 5.4.toJSON == JSONValue( 5.4 ) );
 	assert( toJSON( "test" ) == JSONValue( "test" ) );
+    assert( toJSON( JSONValue( "test" ) ) == JSONValue( "test" ) );
 }
 
 /// Converting InputRanges
@@ -165,7 +166,10 @@ unittest {
 
 /// Convert from JSONValue to any other type
 T fromJSON( T )( JSONValue json ) {
-    static if ( isIntegral!T ) {
+    static if(is(T == JSONValue))
+    {
+        return json;
+    } else static if ( isIntegral!T ) {
         return to!T(json.integer);
     } else static if (isFloatingPoint!T) {
         if (json.type == JSON_TYPE.INTEGER)
@@ -221,6 +225,7 @@ unittest {
 	assert( fromJSON!string( JSONValue( "str" ) ) == "str" );
 	assert( fromJSON!bool( JSONValue( true ) ) == true );
 	assert( fromJSON!bool( JSONValue( false ) ) == false );
+    assert( fromJSON!JSONValue( JSONValue( true ) ) == JSONValue( true ) );
 }
 
 /// Converting arrays
