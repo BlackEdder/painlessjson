@@ -165,50 +165,52 @@ unittest {
 
 /// Convert from JSONValue to any other type
 T fromJSON( T )( JSONValue json ) {
-	T t;
-	static if ( __traits( compiles, cast(Object)(t) ) 
-			&& __traits( compiles, new T )) {
-		t = new T;
-  }	
-	static if ( isIntegral!T ) {
-		t = to!T(json.integer);
-	} else static if (isFloatingPoint!T) {
-		if (json.type == JSON_TYPE.INTEGER)
-			t = to!T(json.integer);
-		else
-			t = to!T(json.floating);
-	} else static if ( is( T == string ) ) {
-		t = to!T(json.str);
-	} else static if ( isBoolean!T ) {
-		if (json.type == JSON_TYPE.TRUE)
-			t = true;
-		else
-			t = false;
-	} else static if ( isArray!T ) {
-		t = map!((js) => fromJSON!(typeof(t.front))(js))( json.array ).array;
-	} else static if ( isAssociativeArray!T ) {
-		JSONValue[string] jsonAA = json.object;
-		foreach( k, v; jsonAA ) {
-			t[fromJSON!(typeof(t.keys.front))(parseJSON(k))] =
-				fromJSON!(typeof(t.values.front))( v );
-		}
-	} else {
-		mixin("JSONValue[string] jsonAA = json.object;");
+    static if ( isIntegral!T ) {
+        return to!T(json.integer);
+    } else static if (isFloatingPoint!T) {
+        if (json.type == JSON_TYPE.INTEGER)
+            return to!T(json.integer);
+        else
+            return to!T(json.floating);
+    } else static if ( is( T == string ) ) {
+        return to!T(json.str);
+    } else static if ( isBoolean!T ) {
+        if (json.type == JSON_TYPE.TRUE)
+            return true;
+        else
+            return false;
+    } else {
+        T t;
+        static if ( __traits( compiles, cast(Object)(t) )
+                    && __traits( compiles, new T )) {
+                        t = new T;
+                    }
+            static if ( isArray!T ) {
+                t= map!((js) => fromJSON!(typeof(t.front))(js))( json.array ).array;
+        } else static if ( isAssociativeArray!T ) {
+            JSONValue[string] jsonAA = json.object;
+            foreach( k, v; jsonAA ) {
+                t[fromJSON!(typeof(t.keys.front))(parseJSON(k))] =
+                    fromJSON!(typeof(t.values.front))( v );
+            }
+        } else {
+            mixin("JSONValue[string] jsonAA = json.object;");
 
-		foreach (name; __traits(allMembers, T))
-		{
-			static if(
-					__traits(compiles, __traits(getMember, t, name))
-					&& __traits(compiles, typeof(__traits(getMember, t, name)))
-					//  Skip Functions 
-					&& !isSomeFunction!(__traits(getMember, t, name) )
-					) 
-			{ // Can we get a value? (filters out void * this)
-				mixin( "if ( \"" ~ name ~ "\" in jsonAA) t." ~ name ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name))).stringof ~")(jsonAA[\"" ~ name ~ "\"]);" );
-			}
-		}	
-	}
-	return t;
+            foreach (name; __traits(allMembers, T))
+            {
+                static if(
+                    __traits(compiles, __traits(getMember, t, name))
+                    && __traits(compiles, typeof(__traits(getMember, t, name)))
+                    //  Skip Functions
+                    && !isSomeFunction!(__traits(getMember, t, name) )
+                    )
+                { // Can we get a value? (filters out void * this)
+                    mixin( "if ( \"" ~ name ~ "\" in jsonAA) t." ~ name ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name))).stringof ~")(jsonAA[\"" ~ name ~ "\"]);" );
+                }
+            }
+        }
+        return t;
+    }
 }
 
 /// Converting common types
