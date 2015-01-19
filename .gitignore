@@ -5,3 +5,6 @@ __*
 .*.swp
 .*.swo
 bin/
+.stversions
+dub.selections.json
+
