@@ -33,6 +33,40 @@ version( unittest ) {
 			return "Noooooo!"; 
 		}
 	}
+    
+    class PointPrivate {
+        private double _x;
+		private double _y;
+		this( double x_, double y_ ) { _x = x_; _y = y_; }
+		string foo() { 
+			writeln( "Class functions should not be called" ); 
+			return "Noooooo!"; 
+		}
+        
+        double x()
+        {
+            return _x;
+        }
+        
+        double y()
+        {
+            return _y;
+        }
+        
+        static PointPrivate _fromJSON(JSONValue value)
+        {
+            return new PointPrivate(fromJSON!double(value["x"]), fromJSON!double(value["y"]));
+        }
+        
+        JSONValue _toJSON()
+        {
+            JSONValue[string] json;
+            json["x"] = JSONValue(x);
+            json["y"] = JSONValue(y);
+            return JSONValue( json );
+        }
+        
+    }
 }
 
 /// Template function that converts any object to JSON
@@ -49,7 +83,11 @@ JSONValue toJSON( T )( T object ) {
 			jsonAA[ key.toJSON.toString ] = value.toJSON;
 		}
 		return JSONValue(jsonAA);
-	} else {
+	} else static if(
+        __traits(compiles,(T t) {return object._toJSON();}))
+    {
+        return object._toJSON();
+    } else {
 		JSONValue[string] json;	
 
 		// Getting all member variables (there is probably an easier way)
@@ -76,6 +114,7 @@ unittest {
 	assert( 4.toJSON != JSONValue( 5 ) );
 	assert( 5.4.toJSON == JSONValue( 5.4 ) );
 	assert( toJSON( "test" ) == JSONValue( "test" ) );
+    assert( toJSON( JSONValue( "test" ) ) == JSONValue( "test" ) );
 }
 
 /// Converting InputRanges
@@ -97,8 +136,14 @@ unittest {
 
 /// User class
 unittest {
- 	PointC p = new PointC( 0, 1 );
-	assert( toJSON( p ).toString == q{{"x":0,"y":1}} );
+ 	PointC p = new PointC( 1, -2 );
+	assert( toJSON( p ).toString == q{{"x":1,"y":-2}} );
+}
+
+/// User class with private fields
+unittest {
+ 	PointPrivate p = new PointPrivate( -1, 2 );
+	assert( toJSON( p ).toString == q{{"x":-1,"y":2}} );
 }
 
 /// Array of classes
@@ -165,50 +210,58 @@ unittest {
 
 /// Convert from JSONValue to any other type
 T fromJSON( T )( JSONValue json ) {
-	T t;
-	static if ( __traits( compiles, cast(Object)(t) ) 
-			&& __traits( compiles, new T )) {
-		t = new T;
-  }	
-	static if ( isIntegral!T ) {
-		t = to!T(json.integer);
-	} else static if (isFloatingPoint!T) {
-		if (json.type == JSON_TYPE.INTEGER)
-			t = to!T(json.integer);
-		else
-			t = to!T(json.floating);
-	} else static if ( is( T == string ) ) {
-		t = to!T(json.str);
-	} else static if ( isBoolean!T ) {
-		if (json.type == JSON_TYPE.TRUE)
-			t = true;
-		else
-			t = false;
-	} else static if ( isArray!T ) {
-		t = map!((js) => fromJSON!(typeof(t.front))(js))( json.array ).array;
-	} else static if ( isAssociativeArray!T ) {
-		JSONValue[string] jsonAA = json.object;
-		foreach( k, v; jsonAA ) {
-			t[fromJSON!(typeof(t.keys.front))(parseJSON(k))] =
-				fromJSON!(typeof(t.values.front))( v );
-		}
-	} else {
-		mixin("JSONValue[string] jsonAA = json.object;");
+    static if(is(T == JSONValue))
+    {
+        return json;
+    } else static if ( isIntegral!T ) {
+        return to!T(json.integer);
+    } else static if (isFloatingPoint!T) {
+        if (json.type == JSON_TYPE.INTEGER)
+            return to!T(json.integer);
+        else
+            return to!T(json.floating);
+    } else static if ( is( T == string ) ) {
+        return to!T(json.str);
+    } else static if ( isBoolean!T ) {
+        if (json.type == JSON_TYPE.TRUE)
+            return true;
+        else
+            return false;
+    } else static if( __traits( compiles,{ return T._fromJSON(json);} ) )
+    {
+        return T._fromJSON(json);
+    } else {
+        T t;
+        static if ( __traits( compiles, cast(Object)(t) )
+                    && __traits( compiles, new T )) {
+                        t = new T;
+                    }
+            static if ( isArray!T ) {
+                t= map!((js) => fromJSON!(typeof(t.front))(js))( json.array ).array;
+        } else static if ( isAssociativeArray!T ) {
+            JSONValue[string] jsonAA = json.object;
+            foreach( k, v; jsonAA ) {
+                t[fromJSON!(typeof(t.keys.front))(parseJSON(k))] =
+                    fromJSON!(typeof(t.values.front))( v );
+            }
+        } else {
+            mixin("JSONValue[string] jsonAA = json.object;");
 
-		foreach (name; __traits(allMembers, T))
-		{
-			static if(
-					__traits(compiles, __traits(getMember, t, name))
-					&& __traits(compiles, typeof(__traits(getMember, t, name)))
-					//  Skip Functions 
-					&& !isSomeFunction!(__traits(getMember, t, name) )
-					) 
-			{ // Can we get a value? (filters out void * this)
-				mixin( "if ( \"" ~ name ~ "\" in jsonAA) t." ~ name ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name))).stringof ~")(jsonAA[\"" ~ name ~ "\"]);" );
-			}
-		}	
-	}
-	return t;
+            foreach (name; __traits(allMembers, T))
+            {
+                static if(
+                    __traits(compiles, __traits(getMember, t, name))
+                    && __traits(compiles, typeof(__traits(getMember, t, name)))
+                    //  Skip Functions
+                    && !isSomeFunction!(__traits(getMember, t, name) )
+                    )
+                { // Can we get a value? (filters out void * this)
+                    mixin( "if ( \"" ~ name ~ "\" in jsonAA) t." ~ name ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name))).stringof ~")(jsonAA[\"" ~ name ~ "\"]);" );
+                }
+            }
+        }
+        return t;
+    }
 }
 
 /// Converting common types
@@ -219,6 +272,7 @@ unittest {
 	assert( fromJSON!string( JSONValue( "str" ) ) == "str" );
 	assert( fromJSON!bool( JSONValue( true ) ) == true );
 	assert( fromJSON!bool( JSONValue( false ) ) == false );
+    assert( fromJSON!JSONValue( JSONValue( true ) ) == JSONValue( true ) );
 }
 
 /// Converting arrays
@@ -261,6 +315,15 @@ unittest {
 /// Class from JSON
 unittest {
 	auto p = fromJSON!PointC( parseJSON( 
+				q{{"x":-1,"y":2}} ) );
+	assert( p.x == -1 );
+	assert( p.y == 2 );
+}
+
+
+/// Class from JSON using _fromJSON
+unittest {
+	auto p = fromJSON!PointPrivate( parseJSON( 
 				q{{"x":-1,"y":2}} ) );
 	assert( p.x == -1 );
 	assert( p.y == 2 );
