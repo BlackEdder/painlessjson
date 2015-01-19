@@ -399,12 +399,12 @@ unittest
     auto p = fromJSON!Point(parseJSON(q{{"x":-1,"y":2}}));
     assert(p.x == -1);
     assert(p.y == 2);
-    p = fromJSON!Point(parseJSON(q{{"x":1}}));
-    assert(p.x == 1);
+    p = fromJSON!Point(parseJSON(q{{"x":2}}));
+    assert(p.x == 2);
     assert(p.y == 1);
-    p = fromJSON!Point(parseJSON(q{{"y":0}}));
+    p = fromJSON!Point(parseJSON(q{{"y":3}}));
     assert(p.x == 0);
-    assert(p.y == 0);
+    assert(p.y == 3);
     p = fromJSON!Point(parseJSON(q{{"x":-1,"y":2,"z":3}}));
     assert(p.x == -1);
     assert(p.y == 2);
