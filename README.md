@@ -1,6 +1,6 @@
-# Painles JSON
+# Painless JSON
 
-Library to painlessly convert your custom types (structs and classes) to and from JSON. This library provides the function toJSON and fromJSON to automatically convert any type to and from JSON. It is possible to override the implementation by defining your own toJSON and fromJSON member functions for a type. The default conversion works by converting all member variables of a type to and from JSON.
+Library to painlessly convert your custom types (structs and classes) to and from JSON. This library provides the function toJSON and fromJSON to automatically convert any type to and from JSON. It is possible to override the implementation by defining your own \_toJSON and \_fromJSON member functions for a type. The default conversion works by converting all member variables of a type to and from JSON.
 
 ## Performance
 
