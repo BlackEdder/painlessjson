@@ -1,4 +1,4 @@
-module painlessjson;
+module painlessjson.painlessjson;
 
 import std.conv;
 import std.json;
