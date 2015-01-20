@@ -420,7 +420,9 @@ unittest
 }
 
 
-/// Class from JSON using _fromJSON
+/**
+  Convert class from JSON using "_fromJSON"
+  */
 unittest
 {
     auto p = fromJSON!PointPrivate(parseJSON(q{{"x":-1,"y":2}}));
