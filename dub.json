@@ -1,9 +1,9 @@
 {
 	"name": "painlessjson",
-	"description": "Converting any custom types to and from JSON the painless way.",
+	"description": "Converting custom types to and from JSON the painless way.",
 	"homepage": "https://github.com/BlackEdder/painlessjson",
 	"copyright": "Copyright © 2014, Edwin van Leeuwen",
-	"authors": ["Edwin van Leeuwen"],
+	"authors": ["Edwin van Leeuwen","Pierre Krafft"],
 	"license": "BSD 3-clause",
 	"dependencies": {
 	}
