@@ -19,6 +19,9 @@ dub build -b release
 ## Examples
 
 ```D
+import std.json;
+import painlessjson;
+
 struct Point
 {
     double x = 0;
