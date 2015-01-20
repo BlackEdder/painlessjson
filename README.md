@@ -30,7 +30,7 @@ auto json = point.toJSON; // => q{{"x":0,"y":1}}
 auto newPoint = fromJSON!Point(parseJSON(q{{"x":-1,"y":2}}));
 ```
 
-More detailed can be found by generating the documentation
+More detailed examples can be found by generating the documentation
 
 ```
 dub -b docs
