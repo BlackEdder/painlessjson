@@ -26,7 +26,7 @@ struct Point
 }
 
 Point point;
-auto json = point.toJSON; # => q{{"x":-1,"y":2}})
+auto json = point.toJSON; // => q{{"x":-1,"y":2}})
 auto newPoint = fromJSON!Point(parseJSON(q{{"x":-1,"y":2}}));
 ```
 
