@@ -92,6 +92,45 @@ class PointPrivate
 
 }
 
+struct PointPrivateProperty
+{
+    private double _x;
+    private double _y;
+    this(double x_, double y_)
+    {
+        _x = x_;
+        _y = y_;
+    }
+
+    string foo()
+    {
+        writeln("Class functions should not be called");
+        return "Noooooo!";
+    }
+
+    @property double x()
+    {
+        return _x;
+    }
+
+    @property void x(double x_)
+    {
+        _x = x_;
+    }
+
+
+    @property double y()
+    {
+        return _y;
+    }
+
+    @property void y(double y_)
+    {
+        _y = y_;
+    }
+
+}
+
 struct PointSerializationName
 {
     @SerializedName("xOut","yOut") double x = 0;

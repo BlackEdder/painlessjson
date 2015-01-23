@@ -167,6 +167,13 @@ unittest
     assert(toJSON(p).toString == q{{"x":-1,"y":2}});
 }
 
+/// User class with private fields and @property
+unittest
+{
+    auto p = PointPrivateProperty(-1, 2);
+    assert(jsonEquals(toJSON(p),q{{"x":-1,"y":2}}));
+}
+
 /// User class with SerializedName annotation
 unittest
 {
@@ -395,6 +402,16 @@ unittest
 unittest
 {
     auto p = fromJSON!PointPrivate(parseJSON(q{{"x":-1,"y":2}}));
+    assert(p.x == -1);
+    assert(p.y == 2);
+}
+
+
+/// Convert struct from JSON using properties
+
+unittest
+{
+    auto p = fromJSON!PointPrivateProperty(parseJSON(q{{"x":-1,"y":2}}));
     assert(p.x == -1);
     assert(p.y == 2);
 }
