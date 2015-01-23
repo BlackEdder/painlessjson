@@ -186,7 +186,9 @@ JSONValue toJSON(T)(T object)
         {
             static if (__traits(compiles, {json[serializationToName!(object,name)] = __traits(getMember, object, name).toJSON;})
                 //      Skip Functions
-                    && !isSomeFunction!(__traits(getMember, object, name)))
+                    && (!isSomeFunction!(__traits(getMember, object, name))
+                        // Unless it's property without parameters
+                        || functionAttributes!(__traits(getMember, object, name)) & FunctionAttribute.property))
             {
                     json[serializationToName!(object,name)] = __traits(getMember, object, name).toJSON;
             }
@@ -441,7 +443,9 @@ T fromJSON(T)(JSONValue json)
                 static if (__traits(compiles, __traits(getMember, t, name))
                     && __traits(compiles, typeof(__traits(getMember, t, name)))
                     //      Skip Functions
-                        && !isSomeFunction!(__traits(getMember, t, name)))
+                        && (!isSomeFunction!(__traits(getMember, t, name))
+                            // Unless it's a property with one parameter
+                            || functionAttributes!(__traits(getMember, t, name)) & FunctionAttribute.property))
                 {
                     enum string fromName = serializationFromName!(t,name);
                     mixin ("if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name
