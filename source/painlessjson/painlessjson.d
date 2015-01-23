@@ -4,6 +4,7 @@ import std.conv;
 import std.json;
 import std.range;
 import std.traits;
+import painlessjson.traits;
 
 version(unittest)
 {
@@ -42,7 +43,6 @@ version(unittest)
         {
         }
 
-        ;
         this(double x_, double y_)
         {
             x = x_;
@@ -98,6 +98,48 @@ version(unittest)
 
     }
 
+    struct PointSerializationName
+    {
+        @SerializedName("xOut","yOut") double x = 0;
+        @SerializedToName("yOut") @SerializedFromName("xOut") double y = 1;
+        this(double x_, double y_)
+        {
+            x = x_;
+            y = y_;
+        }
+
+        string foo()
+        {
+            writeln("Functions should not be called");
+            return "Noooooo!";
+        }
+
+        static string bar()
+        {
+            writeln("Static functions should not be called");
+            return "Noooooo!";
+        }
+    }
+
+    bool jsonEquals(string value1, string value2)
+    {
+        return jsonEquals(parseJSON(value1),value2);
+    }
+
+    bool jsonEquals(JSONValue value1, string value2)
+    {
+        return jsonEquals(value1, parseJSON(value2));
+    }
+    
+    bool jsonEquals(string value1, JSONValue value2)
+    {
+        return jsonEquals(parseJSON(value1),value2);
+    }
+
+    bool jsonEquals(JSONValue value1, JSONValue value2)
+    {
+        return value1.toString == value2.toString;
+    }
 }
 
 /// Template function that converts any object to JSON
@@ -113,14 +155,14 @@ JSONValue toJSON(T)(T object)
     }
     else static if (isArray!T)
     {
-         // Range
+            // Range
         JSONValue[] jsonRange;
         jsonRange = map!((el) => el.toJSON)(object).array;
         return JSONValue(jsonRange);
     }
     else static if (isAssociativeArray!T)
     {
-         // Range
+            // Range
         JSONValue[string] jsonAA;
         foreach (key, value; object)
         {
@@ -142,20 +184,66 @@ JSONValue toJSON(T)(T object)
         // Getting all member variables (there is probably an easier way)
         foreach (name; __traits(allMembers, T))
         {
-            static if (__traits(compiles, __traits(getMember, object, name)
-                .toJSON)
-                //&& __traits(compiles, __traits(getMember, object, name)) 
-                //  Skip Functions 
-                 && !isSomeFunction!(__traits(getMember, object, name)))
+            static if (__traits(compiles, {json[serializationToName!(object,name)] = __traits(getMember, object, name).toJSON;})
+                //      Skip Functions
+                    && !isSomeFunction!(__traits(getMember, object, name)))
             {
-                 // Can we get a value? (filters out void * this)
-                json[name] = __traits(getMember, object, name).toJSON;
+                    json[serializationToName!(object,name)] = __traits(getMember, object, name).toJSON;
             }
         }
         return JSONValue(json);
     }
 }
 
+struct SerializedToName
+{
+    string name;
+}
+
+struct SerializedFromName
+{
+    string name;
+}
+struct SerializedName
+{
+    string to;
+    string from;
+    this(string serializedName)
+    {
+        to = from = serializedName;
+    }
+    this(string to, string from)
+    {
+        this.to = to;
+        this.from = from;
+    }
+}
+
+string serializationToName(alias T, string memberName)()
+{
+    static if(hasValueAnnotation!(__traits(getMember, T, memberName),SerializedName) && getAnnotation!(__traits(getMember, T, memberName),SerializedName).to)
+    {
+        return getAnnotation!(__traits(getMember, T, memberName),SerializedName).to; 
+    }else static if(hasValueAnnotation!(__traits(getMember, T, memberName),SerializedToName) && getAnnotation!(__traits(getMember, T, memberName),SerializedToName).name)
+    {
+        return getAnnotation!(__traits(getMember, T, memberName),SerializedToName).name;
+    }else {
+        return memberName;
+    }
+}
+
+string serializationFromName(alias T, string memberName)()
+{
+    static if(hasValueAnnotation!(__traits(getMember, T, memberName),SerializedName) && getAnnotation!(__traits(getMember, T, memberName),SerializedName).from)
+    {
+        return getAnnotation!(__traits(getMember, T, memberName),SerializedName).from; 
+    }else static if(hasValueAnnotation!(__traits(getMember, T, memberName),SerializedFromName) && getAnnotation!(__traits(getMember, T, memberName),SerializedFromName).name)
+    {
+        return getAnnotation!(__traits(getMember, T, memberName),SerializedFromName).name;
+    }else {
+        return memberName;
+    }
+}
 
 /// Converting common types
 unittest
@@ -206,6 +294,12 @@ unittest
     assert(toJSON(p).toString == q{{"x":-1,"y":2}});
 }
 
+/// User class with SerializedName annotation
+unittest
+{
+    auto p = PointSerializationName(-1, 2);
+    assert(jsonEquals(toJSON(p),q{{"xOut":-1,"yOut":2}}));
+}
 
 /// Array of classes
 unittest
@@ -244,15 +338,15 @@ unittest
 
     auto a = new A;
     assert(a.toJSON.toString == q{{"x":0}});
-    
+
     class B
     {
         double x = 0;
         double y = 1;
     }
 
-    
-    // Both templates will now work for B, so this is ambiguous in D. 
+
+    // Both templates will now work for B, so this is ambiguous in D.
     // Under dmd it looks like the toJSON!T that is loaded first is the one used
     JSONValue toJSON(T : B)(T b)
     {
@@ -263,7 +357,7 @@ unittest
 
     auto b = new B;
     assert(b.toJSON.toString == q{{"x":0,"y":1}});
-    
+
     class Z
     {
         double x = 0;
@@ -310,7 +404,7 @@ T fromJSON(T)(JSONValue json)
             return true;
         else return false;
     }
-    else static if (__traits(compiles, 
+    else static if (__traits(compiles,
     {
         return T._fromJSON(json);
     }
@@ -346,13 +440,13 @@ T fromJSON(T)(JSONValue json)
             {
                 static if (__traits(compiles, __traits(getMember, t, name))
                     && __traits(compiles, typeof(__traits(getMember, t, name)))
-                    //  Skip Functions
-                     && !isSomeFunction!(__traits(getMember, t, name)))
+                    //      Skip Functions
+                        && !isSomeFunction!(__traits(getMember, t, name)))
                 {
-                     // Can we get a value? (filters out void * this)
-                    mixin ("if ( \"" ~ name ~ "\" in jsonAA) t." ~ name
+                    enum string fromName = serializationFromName!(t,name);
+                    mixin ("if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name
                         ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
-                        .stringof ~ ")(jsonAA[\"" ~ name ~ "\"]);");
+                        .stringof ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
                 }
             }
         }
@@ -421,11 +515,19 @@ unittest
 
 
 /**
-  Convert class from JSON using "_fromJSON"
-  */
+    Convert class from JSON using "_fromJSON"
+    */
 unittest
 {
     auto p = fromJSON!PointPrivate(parseJSON(q{{"x":-1,"y":2}}));
     assert(p.x == -1);
     assert(p.y == 2);
+}
+
+/// User class with SerializedName annotation
+unittest
+{
+    auto p = fromJSON!PointSerializationName(parseJSON(q{{"xOut":-1,"yOut":2}}));
+    assert(p.x==2);
+    assert(p.y==-1);
 }
