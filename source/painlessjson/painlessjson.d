@@ -5,6 +5,7 @@ import std.json;
 import std.range;
 import std.traits;
 import painlessjson.traits;
+import painlessjson.annotations;
 
 version(unittest)
 {
@@ -197,29 +198,7 @@ JSONValue toJSON(T)(T object)
     }
 }
 
-struct SerializedToName
-{
-    string name;
-}
 
-struct SerializedFromName
-{
-    string name;
-}
-struct SerializedName
-{
-    string to;
-    string from;
-    this(string serializedName)
-    {
-        to = from = serializedName;
-    }
-    this(string to, string from)
-    {
-        this.to = to;
-        this.from = from;
-    }
-}
 
 string serializationToName(alias T, string memberName)()
 {
