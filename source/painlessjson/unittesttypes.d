@@ -118,7 +118,6 @@ struct PointPrivateProperty
         _x = x_;
     }
 
-
     @property double y()
     {
         return _y;
@@ -129,6 +128,11 @@ struct PointPrivateProperty
         _y = y_;
     }
 
+    @property void bar( double a, double b )
+    { 
+        writeln("Functions annotated with @property and more than one variable should not be called");
+        assert( 0 );
+    }
 }
 
 struct PointSerializationName
