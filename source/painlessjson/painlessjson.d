@@ -77,10 +77,10 @@ JSONValue toJSON(T)(T object)
         // Getting all member variables (there is probably an easier way)
         foreach (name; __traits(allMembers, T))
         {
-            static if (__traits(compiles, {json[serializationToName!(object,name)] = __traits(getMember, object, name).toJSON;})
+            static if (__traits(compiles, {json[serializationToName!(__traits(getMember, object, name),name)] = __traits(getMember, object, name).toJSON;})
                     && isFieldOrProperty!(__traits(getMember, object, name)))
             {
-                    json[serializationToName!(object,name)] = __traits(getMember, object, name).toJSON;
+                    json[serializationToName!(__traits(getMember, object, name),name)] = __traits(getMember, object, name).toJSON;
             }
         }
         return JSONValue(json);
@@ -89,30 +89,40 @@ JSONValue toJSON(T)(T object)
 
 
 
-string serializationToName(alias T, string memberName)()
+template serializationToName(alias T, string defaultName)
 {
-    static if(hasValueAnnotation!(__traits(getMember, T, memberName),SerializedName) && getAnnotation!(__traits(getMember, T, memberName),SerializedName).to)
+    static string helper()
     {
-        return getAnnotation!(__traits(getMember, T, memberName),SerializedName).to; 
-    }else static if(hasValueAnnotation!(__traits(getMember, T, memberName),SerializedToName) && getAnnotation!(__traits(getMember, T, memberName),SerializedToName).name)
-    {
-        return getAnnotation!(__traits(getMember, T, memberName),SerializedToName).name;
-    }else {
-        return memberName;
+        static if(hasValueAnnotation!(T,SerializedName) && getAnnotation!(T,SerializedName).to)
+        {
+            return getAnnotation!(T,SerializedName).to; 
+        }else static if(hasValueAnnotation!(T,SerializedToName) && getAnnotation!(T,SerializedToName).name)
+        {
+            return getAnnotation!(T,SerializedToName).name;
+        }else {
+            return defaultName;
+        }
     }
+
+    enum string serializationToName = helper;
 }
 
-string serializationFromName(alias T, string memberName)()
+template serializationFromName(alias T, string defaultName)
 {
-    static if(hasValueAnnotation!(__traits(getMember, T, memberName),SerializedName) && getAnnotation!(__traits(getMember, T, memberName),SerializedName).from)
+    static string helper()
     {
-        return getAnnotation!(__traits(getMember, T, memberName),SerializedName).from; 
-    }else static if(hasValueAnnotation!(__traits(getMember, T, memberName),SerializedFromName) && getAnnotation!(__traits(getMember, T, memberName),SerializedFromName).name)
-    {
-        return getAnnotation!(__traits(getMember, T, memberName),SerializedFromName).name;
-    }else {
-        return memberName;
+        static if(hasValueAnnotation!(T,SerializedName) && getAnnotation!(T,SerializedName).from)
+        {
+            return getAnnotation!(T,SerializedName).from; 
+        }else static if(hasValueAnnotation!(T,SerializedFromName) && getAnnotation!(T,SerializedFromName).name)
+        {
+            return getAnnotation!(T,SerializedFromName).name;
+        }else {
+            return defaultName;
+        }
     }
+
+    enum string serializationFromName = helper;
 }
 
 /// Converting common types
@@ -319,7 +329,7 @@ T fromJSON(T)(JSONValue json)
                     && __traits(compiles, typeof(__traits(getMember, t, name)))
                         && isFieldOrProperty!(__traits(getMember, t, name)))
                 {
-                    enum string fromName = serializationFromName!(t,name);
+                    enum string fromName = serializationFromName!(__traits(getMember, t, name),name);
                     mixin ("if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name
                         ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
                         .stringof ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
