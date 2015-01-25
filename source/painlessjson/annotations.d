@@ -24,3 +24,15 @@ struct SerializedName
         this.from = from;
     }
 }
+struct SerializeIgnore
+{
+}
+
+struct SerializeToIgnore
+{
+}
+
+struct SerializeFromIgnore
+{
+}
+
