@@ -1,6 +1,12 @@
 # Painless JSON [![Build Status](https://travis-ci.org/BlackEdder/painlessjson.svg?branch=master)](https://travis-ci.org/BlackEdder/painlessjson)
 
-Library to painlessly convert your custom types (structs and classes) to and from JSON. This library provides the function toJSON and fromJSON to automatically convert any type to and from JSON. It is possible to override the implementation by defining your own \_toJSON and \_fromJSON member functions for a type. The default conversion works by converting all member variables of a type to and from JSON.
+Library to painlessly convert your custom types (structs and classes) to and from JSON. This library provides the function toJSON and fromJSON to automatically convert any type to and from JSON. It is possible to override the implementation by defining your own \_toJSON and \_fromJSON member functions for a type or with User Defined Attributes. The default conversion works by converting all member variables of a type to and from JSON (including functions with the @property attribute).
+
+Painlessjson works by first serializing a class/struct and converting it to JSON. You can influence the serialisation with the following User Defined Attributes:
+
+- @SerializeIgnore disable serialization for the variable
+- @SerializedName('To', 'From') Use a different name when serializing/deserializing
+- @SerializedToName('To') @SerializedFromName('From') Alternative way of defining names.
 
 ## Installation
 
@@ -13,8 +19,6 @@ git clone http://github.com/BlackEdder/painlessjson.git
 cd painlessjson 
 dub build -b release
 ```
-
-
 
 ## Examples
 
