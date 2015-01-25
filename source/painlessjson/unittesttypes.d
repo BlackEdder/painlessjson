@@ -173,4 +173,10 @@ struct PointSerializationIgnore
         z = z_;
     }
 
+    @property @SerializeIgnore double foo() {
+        return 0.1;
+    }
+
+    @property @SerializeIgnore void foo(double a) {
+    }
 }

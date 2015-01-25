@@ -8,7 +8,7 @@ function watch_tests() {
 while : 
 do
 	#file=`inotifywait -q -e CREATE bin/ --format %f`
-	file=`inotifywait -q -e ATTRIB source/ --format %f`
+	file=`inotifywait -q -e ATTRIB source/painlessjson/ --format %f`
 	sleep 1
 	dub test
 done
