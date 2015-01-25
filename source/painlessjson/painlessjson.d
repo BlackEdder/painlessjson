@@ -152,6 +152,13 @@ unittest
     assert(jsonEquals(toJSON(p),q{{"xOut":-1,"yOut":2}}));
 }
 
+/// User class with SerializeIgnore annotations
+unittest
+{
+    auto p = PointSerializationIgnore(-1, 5,4);
+    assert(jsonEquals(toJSON(p),q{{"z":5}}));
+}
+
 /// Array of classes
 unittest
 {
@@ -391,4 +398,13 @@ unittest
     auto p = fromJSON!PointSerializationName(parseJSON(q{{"xOut":-1,"yOut":2}}));
     assert(p.x==2);
     assert(p.y==-1);
+}
+
+/// User class with SerializeIgnore annotations
+unittest
+{
+    auto p = fromJSON!PointSerializationIgnore(parseJSON(q{{"z":15}}));
+    assert(p.x==0);
+    assert(p.y==1);
+    assert(p.z==15);
 }
