@@ -5,6 +5,7 @@ Library to painlessly convert your custom types (structs and classes) to and fro
 Painlessjson works by first serializing a class/struct and converting it to JSON. You can influence the serialisation with the following User Defined Attributes:
 
 - @SerializeIgnore disable serialization for the variable
+- @SerializedName('Name') Use specified name when serializing/deserializing
 - @SerializedName('To', 'From') Use a different name when serializing/deserializing
 - @SerializedToName('To') @SerializedFromName('From') Alternative way of defining names.
 
