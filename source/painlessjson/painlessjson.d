@@ -78,6 +78,7 @@ JSONValue toJSON(T)(T object)
         foreach (name; __traits(allMembers, T))
         {
             static if (__traits(compiles, {json[serializationToName!(__traits(getMember, object, name),name)] = __traits(getMember, object, name).toJSON;})
+                        && !hasAnyOfTheseAnnotations!(__traits(getMember, object, name), SerializeIgnore, SerializeToIgnore)
                     && isFieldOrProperty!(__traits(getMember, object, name)))
             {
                     json[serializationToName!(__traits(getMember, object, name),name)] = __traits(getMember, object, name).toJSON;
@@ -290,6 +291,7 @@ T fromJSON(T)(JSONValue json)
             {
                 static if (__traits(compiles, __traits(getMember, t, name))
                     && __traits(compiles, typeof(__traits(getMember, t, name)))
+                        && !hasAnyOfTheseAnnotations!(__traits(getMember, t, name), SerializeIgnore, SerializeFromIgnore)
                         && isFieldOrProperty!(__traits(getMember, t, name)))
                 {
                     enum string fromName = serializationFromName!(__traits(getMember, t, name),name);
