@@ -1,4 +1,5 @@
 module painlessjson.unittesttypes;
+
 import painlessjson.annotations;
 import std.json;
 import std.algorithm;
@@ -128,17 +129,18 @@ struct PointPrivateProperty
         _y = y_;
     }
 
-    @property void bar( double a, double b )
-    { 
+    @property void bar(double a, double b)
+    {
         writeln("Functions annotated with @property and more than one variable should not be called");
-        assert( 0 );
+        assert(0);
     }
+
 }
 
 struct PointSerializationName
 {
-    @SerializedName("xOut","yOut") double x = 0;
-    @SerializedToName("yOut") @SerializedFromName("xOut") double y = 1;
+    @SerializedName("xOut", "yOut")double x = 0;
+    @SerializedToName("yOut") @SerializedFromName("xOut")double y = 1;
     this(double x_, double y_)
     {
         x = x_;
@@ -156,17 +158,19 @@ struct PointSerializationName
         writeln("Static functions should not be called");
         return "Noooooo!";
     }
+
 }
 
 struct PointSerializationIgnore
 {
     @SerializeIgnore double x = 0;
     @SerializedToName("z") @SerializeFromIgnore double y = 1;
-    @SerializeToIgnore double z=2;
+    @SerializeToIgnore double z = 2;
     this(double x_, double y_, double z_)
     {
         x = x_;
         y = y_;
         z = z_;
     }
+
 }

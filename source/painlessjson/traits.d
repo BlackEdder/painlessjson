@@ -1,4 +1,5 @@
 module painlessjson.traits;
+
 import std.traits;
 
 template hasAnnotation(alias f, Attr)
@@ -18,9 +19,9 @@ template hasAnyOfTheseAnnotations(alias f, Attr...)
 {
     static bool helper()
     {
-        foreach (annotation;Attr)
-            static if (hasAnnotation!(f,annotation))
-                return true;
+        foreach (annotation; Attr)
+            static if (hasAnnotation!(f, annotation))
+            return true;
         return false;
     }
 
@@ -44,15 +45,14 @@ template hasAnyOfTheseValueAnnotations(alias f, Attr...)
 {
     static bool helper()
     {
-        foreach (annotation;Attr)
-            static if (hasValueAnnotation(f,annotation))
-                return true;
+        foreach (annotation; Attr)
+            static if (hasValueAnnotation(f, annotation))
+            return true;
         return false;
     }
 
     enum bool hasAnyOfTheseValueAnnotations = helper;
 }
-
 
 template getAnnotation(alias f, Attr) if (hasValueAnnotation!(f, Attr))
 {
@@ -71,10 +71,11 @@ template isFieldOrProperty(alias T)
 {
     static bool helper()
     {
-        static if(isSomeFunction!(T))
+        static if (isSomeFunction!(T))
         {
-            return  (functionAttributes!(T) & FunctionAttribute.property) !=0;
-        } else
+            return (functionAttributes!(T) & FunctionAttribute.property) != 0;
+        }
+        else
         {
             return true;
         }

@@ -1,4 +1,5 @@
 module painlessjson.annotations;
+
 import painlessjson.traits;
 
 struct SerializedToName
@@ -10,6 +11,7 @@ struct SerializedFromName
 {
     string name;
 }
+
 struct SerializedName
 {
     string to;
@@ -18,11 +20,13 @@ struct SerializedName
     {
         to = from = serializedName;
     }
+
     this(string to, string from)
     {
         this.to = to;
         this.from = from;
     }
+
 }
 
 struct SerializeIgnore
@@ -41,13 +45,18 @@ template serializationToName(alias T, string defaultName)
 {
     static string helper()
     {
-        static if(hasValueAnnotation!(T,SerializedName) && getAnnotation!(T,SerializedName).to)
+        static if (hasValueAnnotation!(T, SerializedName) && getAnnotation!(T,
+            SerializedName).to)
         {
-            return getAnnotation!(T,SerializedName).to; 
-        }else static if(hasValueAnnotation!(T,SerializedToName) && getAnnotation!(T,SerializedToName).name)
+            return getAnnotation!(T, SerializedName).to;
+        }
+        else static if (hasValueAnnotation!(T, SerializedToName)
+            && getAnnotation!(T, SerializedToName).name)
         {
-            return getAnnotation!(T,SerializedToName).name;
-        }else {
+            return getAnnotation!(T, SerializedToName).name;
+        }
+        else
+        {
             return defaultName;
         }
     }
@@ -59,13 +68,18 @@ template serializationFromName(alias T, string defaultName)
 {
     static string helper()
     {
-        static if(hasValueAnnotation!(T,SerializedName) && getAnnotation!(T,SerializedName).from)
+        static if (hasValueAnnotation!(T, SerializedName) && getAnnotation!(T,
+            SerializedName).from)
         {
-            return getAnnotation!(T,SerializedName).from; 
-        }else static if(hasValueAnnotation!(T,SerializedFromName) && getAnnotation!(T,SerializedFromName).name)
+            return getAnnotation!(T, SerializedName).from;
+        }
+        else static if (hasValueAnnotation!(T, SerializedFromName)
+            && getAnnotation!(T, SerializedFromName).name)
         {
-            return getAnnotation!(T,SerializedFromName).name;
-        }else {
+            return getAnnotation!(T, SerializedFromName).name;
+        }
+        else
+        {
             return defaultName;
         }
     }
