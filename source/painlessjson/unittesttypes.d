@@ -157,3 +157,16 @@ struct PointSerializationName
         return "Noooooo!";
     }
 }
+
+struct PointSerializationIgnore
+{
+    @SerializeIgnore double x = 0;
+    @SerializedToName("z") @SerializeFromIgnore double y = 1;
+    @SerializeToIgnore double z=2;
+    this(double x_, double y_, double z_)
+    {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
+}
