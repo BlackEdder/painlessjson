@@ -149,7 +149,7 @@ unittest
 unittest
 {
     auto p = PointPrivateProperty(-1, 2);
-    assert(jsonEquals(toJSON(p), q{{"x":-1,"y":2}}));
+    assert(jsonEquals(toJSON(p), q{{"x":-1,"y":2,"z":1}}));
 }
 
 
@@ -309,7 +309,8 @@ T fromJSON(T)(JSONValue json)
                 static if (__traits(compiles, __traits(getMember, t, name))
                     && __traits(compiles, typeof(__traits(getMember, t, name)))
                     && !hasAnyOfTheseAnnotations!(__traits(getMember, t, name),
-                    SerializeIgnore, SerializeFromIgnore) && isFieldOrProperty!(__traits(getMember,
+                    SerializeIgnore, SerializeFromIgnore) && 
+                    isWritableFieldOrProperty!(__traits(getMember,
                     t, name)))
                 {
                     enum string fromName = serializationFromName!(__traits(getMember,
@@ -400,7 +401,7 @@ unittest
 
 unittest
 {
-    auto p = fromJSON!PointPrivateProperty(parseJSON(q{{"x":-1,"y":2}}));
+    auto p = fromJSON!PointPrivateProperty(parseJSON(q{{"x":-1,"y":2,"z":3}}));
     assert(p.x == -1);
     assert(p.y == 2);
 }
