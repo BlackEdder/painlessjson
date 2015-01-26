@@ -2,9 +2,11 @@
 
 Library to painlessly convert your custom types (structs and classes) to and from JSON. This library provides the function toJSON and fromJSON to automatically convert any type to and from JSON. It is possible to override the implementation by defining your own \_toJSON and \_fromJSON member functions for a type or with User Defined Attributes. The default conversion works by converting all member variables of a type to and from JSON (including functions with the @property attribute).
 
-Painlessjson works by first serializing a class/struct and converting it to JSON. You can influence the serialisation with the following User Defined Attributes:
+Painlessjson works by serializing a class/struct using compile time reflection and converts the public fields to a JSON object. You can influence the serialisation/seserialization with the following User Defined Attributes:
 
-- @SerializeIgnore disable serialization for the variable
+
+- @SerializeToIgnore @SerializeToIgnore disable serialization in the from step or the to step
+- @SerializeIgnore is the same as combining @SerializeToIgnore @SerializeToIgnore and disables serialization/deserialization for the variable
 - @SerializedName('Name') Use specified name when serializing/deserializing
 - @SerializedName('To', 'From') Use a different name when serializing/deserializing
 - @SerializedToName('To') @SerializedFromName('From') Alternative way of defining names.
@@ -46,7 +48,7 @@ dub -b docs
 
 ## Performance
 
-On the backend this library uses std.json and performance is mainly determined by the std.json implementation. At the moment of writing (2014) std.json is known to be slow compared to other languages. Hopefully, this will be improved over time.
+The library uses compile time reflection to find the fields in your classes. This generates the same code as a handwritten implementation would. It uses std.json on the backend and performance is mainly determined by the std.json implementation. At the moment of writing (2014) std.json is known to be slow compared to other languages. Hopefully, this will be improved over time.
 
 ## Tested compilers
 ![dmd-2.066.1](https://img.shields.io/badge/DMD-2.066.1-brightgreen.svg) ![DMD-2.065.0](https://img.shields.io/badge/DMD-2.065.0-brightgreen.svg) ![DMD-2.064.2](https://img.shields.io/badge/DMD-2.064.2-red.svg) ![LDC-0.14.0](https://img.shields.io/badge/LDC-0.14.0-brightgreen.svg) ![LDC-0.15.1](https://img.shields.io/badge/LDC-0.15.1-brightgreen.svg) ![GDC-4.9.0](https://img.shields.io/badge/GDC-4.9.0-brightgreen.svg)
