@@ -129,6 +129,11 @@ struct PointPrivateProperty
         _y = y_;
     }
 
+    @property double z()
+    {
+        return 1.0;
+    }
+
     @property void bar(double a, double b)
     {
         writeln("Functions annotated with @property and more than one variable should not be called");
