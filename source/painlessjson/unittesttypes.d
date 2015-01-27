@@ -178,10 +178,10 @@ struct PointSerializationIgnore
         z = z_;
     }
 
-    @property @SerializeIgnore double foo() {
+    @SerializeIgnore @property double foo() {
         return 0.1;
     }
 
-    @property @SerializeIgnore void foo(double a) {
+    @SerializeIgnore @property void foo(double a) {
     }
 }
