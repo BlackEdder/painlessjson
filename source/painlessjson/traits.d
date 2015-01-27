@@ -83,38 +83,3 @@ template isFieldOrProperty(alias T)
 
     enum isFieldOrProperty = helper;
 }
-
-template isWritableFieldOrProperty(alias T)
-{
-    static bool helper()
-    {
-        static if (isSomeFunction!(T))
-        {
-            static if (arity!T == 1)
-                return (functionAttributes!(T) & FunctionAttribute.property) != 0;
-            else
-                return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    enum isWritableFieldOrProperty = helper;
-}
-
-unittest
-{
-    class A
-    {
-        @property double foo() { return 1.0; }
-        @property void foo(double x) {}
-        @property double bar() { return 1.0; }
-    }
-
-    auto a = new A;
-    import std.stdio;
-    assert( isWritableFieldOrProperty!(a.foo) );
-    assert( !isWritableFieldOrProperty!(a.bar) );
-}

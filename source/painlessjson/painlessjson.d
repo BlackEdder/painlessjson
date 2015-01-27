@@ -310,14 +310,29 @@ T fromJSON(T)(JSONValue json)
                     && __traits(compiles, typeof(__traits(getMember, t, name)))
                     && !hasAnyOfTheseAnnotations!(__traits(getMember, t, name),
                     SerializeIgnore, SerializeFromIgnore) && 
-                    isWritableFieldOrProperty!(__traits(getMember,
-                    t, name)))
+                    isFieldOrProperty!(__traits(getMember, t, name)))
                 {
+                    // is the property actually writable
+                    static if (isSomeFunction!(__traits(getMember, t, name)))
+                    {
+                        foreach( overload; __traits( getOverloads, T, name ))
+                            static if ( arity!overload == 1 )
+                            {
+                                enum string fromName = serializationFromName!(__traits(getMember,
+                                            t, name), name);
+                                mixin ("if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name
+                                        ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
+                                        .stringof ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
+                            }
+                    }
+                    else
+                    {
                     enum string fromName = serializationFromName!(__traits(getMember,
                         t, name), name);
                     mixin ("if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name
                         ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
                         .stringof ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
+                    }
                 }
             }
         }
