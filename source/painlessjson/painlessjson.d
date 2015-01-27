@@ -306,13 +306,11 @@ T fromJSON(T)(JSONValue json)
             mixin ("JSONValue[string] jsonAA = json.object;");
             foreach (name; __traits(allMembers, T))
             {
-                static if (__traits(compiles, 
-                    mixin ("t." ~ name
-                        ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
-                        .stringof ~ ")(jsonAA[\"aFieldName\"])"))
-                    && !hasAnyOfTheseAnnotations!(__traits(getMember, t, name),
-                    SerializeIgnore, SerializeFromIgnore) && 
-                    isFieldOrProperty!(__traits(getMember, t, name)))
+                static if (__traits(compiles, mixin ("t." ~ name
+                    ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
+                    .stringof ~ ")(jsonAA[\"aFieldName\"])")) && !hasAnyOfTheseAnnotations!(__traits(getMember,
+                    t, name), SerializeIgnore, SerializeFromIgnore)
+                    && isFieldOrProperty!(__traits(getMember, t, name)))
                 {
                     enum string fromName = serializationFromName!(__traits(getMember,
                         t, name), name);
