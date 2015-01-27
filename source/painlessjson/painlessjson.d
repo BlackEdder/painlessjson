@@ -310,7 +310,6 @@ T fromJSON(T)(JSONValue json)
                     mixin ("t." ~ name
                         ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
                         .stringof ~ ")(jsonAA[\"aFieldName\"])"))
-                    && __traits(compiles, typeof(__traits(getMember, t, name)))
                     && !hasAnyOfTheseAnnotations!(__traits(getMember, t, name),
                     SerializeIgnore, SerializeFromIgnore) && 
                     isFieldOrProperty!(__traits(getMember, t, name)))
