@@ -306,33 +306,20 @@ T fromJSON(T)(JSONValue json)
             mixin ("JSONValue[string] jsonAA = json.object;");
             foreach (name; __traits(allMembers, T))
             {
-                static if (__traits(compiles, __traits(getMember, t, name))
+                static if (__traits(compiles, 
+                    mixin ("t." ~ name
+                        ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
+                        .stringof ~ ")(jsonAA[\"aFieldName\"])"))
                     && __traits(compiles, typeof(__traits(getMember, t, name)))
                     && !hasAnyOfTheseAnnotations!(__traits(getMember, t, name),
                     SerializeIgnore, SerializeFromIgnore) && 
                     isFieldOrProperty!(__traits(getMember, t, name)))
                 {
-                    // is the property actually writable
-                    static if (isSomeFunction!(__traits(getMember, t, name)))
-                    {
-                        foreach( overload; __traits( getOverloads, T, name ))
-                            static if ( arity!overload == 1 )
-                            {
-                                enum string fromName = serializationFromName!(__traits(getMember,
-                                            t, name), name);
-                                mixin ("if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name
-                                        ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
-                                        .stringof ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
-                            }
-                    }
-                    else
-                    {
                     enum string fromName = serializationFromName!(__traits(getMember,
                         t, name), name);
                     mixin ("if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name
                         ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
                         .stringof ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
-                    }
                 }
             }
         }
