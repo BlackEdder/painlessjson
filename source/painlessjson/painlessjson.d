@@ -301,7 +301,7 @@ T fromJSON(T)(JSONValue json)
     else
     {
         T t;
-        static if (__traits(compiles, cast(Object)(t)) && __traits(compiles,
+        static if (is(T==class) && __traits(compiles,
             new T))
         {
             t = new T;
