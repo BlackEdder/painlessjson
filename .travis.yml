@@ -1,8 +1,13 @@
 language: d
+script: ./travis.sh
+sudo: false
 
-d:
-  - dmd-2.065.0
-  - dmd-2.066.1
-  - ldc-0.14.0
-  - ldc-0.15.1
-  - gdc-4.9.0
+matrix:
+  include:
+    - d: dmd-2.065.0
+      env:
+        - secure: SVmrDxY8q18XeVcLf1XLJo2ZUsb6Y4YaS7T3WukIfbfDbOlpw9pcONb1bV5+W5OxHUlQ7vlriU3Q2RT/jf948vyQOb5kG8HdwicNqJxWztVgX+sDPAAY7taV6XgqDmiujW4v3lJS7OAQjhfQ1euaURa4Ff6amvDlt5wtYWs4vEs=
+    - d: dmd-2.066.1
+    - d: ldc-0.14.0
+    - d: ldc-0.15.1
+    - d: gdc-4.9.0
