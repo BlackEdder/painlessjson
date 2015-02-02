@@ -12,6 +12,6 @@ if [ ! -z "$GH_TOKEN" ]; then
     git config user.email "travis@nodemeatspace.com"
     git add .
     git commit -m "Deployed to Github Pages"
-    #git push --force --quiet "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}" docs:gh-pages > /dev/null 2>&1
-    git push --force "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}" HEAD:gh-pages
+    git push --force --quiet "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}" HEAD:gh-pages > /dev/null 2>&1
+    #git push --force "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}" HEAD:gh-pages
 fi
