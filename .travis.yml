@@ -6,7 +6,7 @@ matrix:
   include:
     - d: dmd-2.065.0
       env:
-        - secure: "Ss9dPw/7sI6aM5/rLLs4Xi/w5zAOtCM0hjcS5u2dro5LA7J+oO8cKkrianK2h6u1EhdPR2nfyj6RRkYEcBTlpQ8lgDLr8aMEhMA1XUOWp2E63B9ynP1mgdfQturTGMJoQKz8XK2+XepZsdklqhHzU6pNftZGRpHENyhQVZgWYX8="
+        - secure: "HYyeqymx/RXciztZZ837ZFuuUKvXf5bgzv32TaZEtZ2hXFpNuL4ie+pYwqAAcKWblilOQ3jEr4MjFwcjlMid8jXbXVhcPnY5sY4bSHLiKj3SCnThTgaSvmsO2P1CrGA+nbaJTFLvs4s91q6GStg3Gc6zry1y14Hu9T1brUf3cx8="
     - d: dmd-2.066.1
     - d: ldc-0.14.0
     - d: ldc-0.15.1
