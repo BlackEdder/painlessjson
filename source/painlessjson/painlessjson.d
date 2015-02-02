@@ -12,6 +12,7 @@ version(unittest)
     import std.algorithm;
     import std.stdio;
     import painlessjson.unittesttypes;
+	import std.typecons;
 
     bool jsonEquals(string value1, string value2)
     {
@@ -187,6 +188,23 @@ unittest
     assert(aaStruct.toJSON.toString == q{{"0":{"x":-1,"y":1},"1":{"x":2,"y":0}}});
 }
 
+/// Unnamed tuples
+unittest
+{
+	Tuple!(int, int) point;
+	point[0] = 5;
+	point[1] = 6;
+	assert(jsonEquals(toJSON(point), q{{"_0":5,"_1":6}}));
+}
+
+/// Named tuples
+unittest
+{
+	Tuple!(int, "x", int, "y") point;
+	point.x = 5;
+	point.y = 6;
+	assert(point== fromJSON!(Tuple!(int,"x",int,"y"))(parseJSON(q{{"x":5,"y":6}})));
+}
 
 /// Overloaded toJSON
 unittest
@@ -283,7 +301,7 @@ T fromJSON(T)(JSONValue json)
     else
     {
         T t;
-        static if (__traits(compiles, cast(Object)(t)) && __traits(compiles,
+        static if (is(T==class) && __traits(compiles,
             new T))
         {
             t = new T;
@@ -422,4 +440,13 @@ unittest
     assert(p.x == 0);
     assert(p.y == 1);
     assert(p.z == 15);
+}
+
+/// Unnamed tuples
+unittest
+{
+	Tuple!(int, int) point;
+	point[0] = 5;
+	point[1] = 6;
+	assert(point== fromJSON!(Tuple!(int,int))(parseJSON(q{{"_0":5,"_1":6}})));
 }
