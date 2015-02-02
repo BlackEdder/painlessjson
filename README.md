@@ -40,7 +40,7 @@ auto json = point.toJSON; // => q{{"x":0,"y":1}}
 auto newPoint = fromJSON!Point(parseJSON(q{{"x":-1,"y":2}}));
 ```
 
-More detailed examples can be found in the [documentation](http://blackedder.github.io/painlessjson/painlessjson.html). The classes used in the examples are defined [here](http://blackedder.github.io/painlessjson/unittesttypes.html).
+More detailed examples can be found in the [documentation](http://blackedder.github.io/painlessjson/painlessjson.html). The classes/structs used in the examples are defined [here](https://github.com/BlackEdder/painlessjson/blob/master/source/painlessjson/unittesttypes.d).
 
 ## Performance
 
