@@ -6,10 +6,11 @@ import std.algorithm;
 import std.stdio;
 import painlessjson.painlessjson;
 
+///
 struct Point
 {
-    double x = 0;
-    double y = 1;
+    double x = 0; ///
+    double y = 1; ///
     this(double x_, double y_)
     {
         x = x_;
@@ -30,9 +31,11 @@ struct Point
 
 }
 
+///
 class PointC
 {
-    double x = 0;
+    ///
+    double x = 0;  
     double y = 1;
     this()
     {
@@ -166,11 +169,14 @@ struct PointSerializationName
 
 }
 
+///
 struct PointSerializationIgnore
 {
-    @SerializeIgnore double x = 0;
-    @SerializedToName("z") @SerializeFromIgnore double y = 1;
-    @SerializeToIgnore double z = 2;
+    @SerializeIgnore double x = 0; ///
+    @SerializedToName("z") @SerializeFromIgnore double y = 1; ///
+    @SerializeToIgnore double z = 2; ///
+    
+    ///
     this(double x_, double y_, double z_)
     {
         x = x_;
@@ -178,11 +184,13 @@ struct PointSerializationIgnore
         z = z_;
     }
 
+    ///
     @SerializeIgnore @property double foo()
     {
         return 0.1;
     }
 
+    ///
     @SerializeIgnore @property void foo(double a)
     {
     }
