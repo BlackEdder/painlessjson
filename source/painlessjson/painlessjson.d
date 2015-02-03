@@ -36,35 +36,35 @@ version(unittest)
 
 }
 
-/// Template function that converts any object to JSON
-JSONValue toJSON(T)(T object)
+//See if we can use something else than __traits(compiles, (T t){JSONValue(t);})
+private JSONValue toJSONImpl(T)(T object) if (__traits(compiles, (T t){JSONValue(t);})){
+    return JSONValue(object);
+}
+
+
+//See if we can use something else than !__traits(compiles, (T t){JSONValue(t);})
+private JSONValue toJSONImpl(T)(T object) if (isArray!T && !__traits(compiles, (T t){JSONValue(t);}))
 {
-    static if (__traits(compiles, (T t)
+    JSONValue[] jsonRange;
+    jsonRange = map!((el) => el.toJSON)(object).array;
+    return JSONValue(jsonRange);
+}
+
+private JSONValue toJSONImpl(T)(T object)if (isAssociativeArray!T)
+{
+    JSONValue[string] jsonAA;
+    foreach (key, value; object)
     {
-        JSONValue(t);
+        jsonAA[key.toJSON.toString] = value.toJSON;
     }
-    ))
-    {
-        return JSONValue(object);
-    }
-    else static if (isArray!T)
-    {
-        // Range
-        JSONValue[] jsonRange;
-        jsonRange = map!((el) => el.toJSON)(object).array;
-        return JSONValue(jsonRange);
-    }
-    else static if (isAssociativeArray!T)
-    {
-        // Range
-        JSONValue[string] jsonAA;
-        foreach (key, value; object)
-        {
-            jsonAA[key.toJSON.toString] = value.toJSON;
-        }
-        return JSONValue(jsonAA);
-    }
-    else static if (__traits(compiles, (T t)
+    return JSONValue(jsonAA);
+}
+    
+
+
+private JSONValue toJSONImpl(T)(T object)if (!isBuiltinType!T && !__traits(compiles, (T t){JSONValue(t);}))
+{
+  static if (__traits(compiles, (T t)
     {
         return object._toJSON();
     }
@@ -95,6 +95,10 @@ JSONValue toJSON(T)(T object)
     }
 }
 
+/// Template function that converts any object to JSON
+JSONValue toJSON(T)(T t){
+    return toJSONImpl!T(t);
+}
 
 /// Converting common types
 unittest
@@ -263,34 +267,58 @@ unittest
 }
 
 
-/// Convert from JSONValue to any other type
-T fromJSON(T)(JSONValue json)
+private T fromJSONImpl(T)(JSONValue json) if(is(T == JSONValue)){
+    return json;
+}
+
+private T fromJSONImpl(T)(JSONValue json) if(isIntegral!T){
+    return to!T(json.integer);
+}
+
+private T fromJSONImpl(T)(JSONValue json) if (isFloatingPoint!T)
 {
-    static if (is(T == JSONValue))
-    {
-        return json;
-    }
-    else static if (isIntegral!T)
-    {
+    if (json.type == JSON_TYPE.INTEGER)
         return to!T(json.integer);
-    }
-    else static if (isFloatingPoint!T)
+    else
+        return to!T(json.floating);
+}
+
+private T fromJSONImpl(T)(JSONValue json) if (is(T == string))
+{
+    return to!T(json.str);
+}
+
+private T fromJSONImpl(T)(JSONValue json) if (isBoolean!T)
+{
+    if (json.type == JSON_TYPE.TRUE)
+        return true;
+    else
+        return false;
+}
+
+
+
+private T fromJSONImpl(T)(JSONValue json) if (isArray!T && !is(T == string))
+{
+    T t; //Se is we can find another way of finding t.front
+    return map!((js) => fromJSON!(typeof(t.front))(js))(json.array).array;
+}
+
+private T fromJSONImpl(T)(JSONValue json) if (isAssociativeArray!T)
+{
+    T t;
+    JSONValue[string] jsonAA = json.object;
+    foreach (k, v; jsonAA)
     {
-        if (json.type == JSON_TYPE.INTEGER)
-            return to!T(json.integer);
-        else return to!T(json.floating);
+        t[fromJSON!(typeof(t.keys.front))(parseJSON(k))] = fromJSON!(typeof(t
+            .values.front))(v);
     }
-    else static if (is(T == string))
-    {
-        return to!T(json.str);
-    }
-    else static if (isBoolean!T)
-    {
-        if (json.type == JSON_TYPE.TRUE)
-            return true;
-        else return false;
-    }
-    else static if (__traits(compiles, 
+    return t;
+}
+
+private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValue))
+{
+    static if (__traits(compiles, 
     {
         return T._fromJSON(json);
     }
@@ -306,21 +334,8 @@ T fromJSON(T)(JSONValue json)
         {
             t = new T;
         }
-        static if (isArray!T)
-        {
-            t = map!((js) => fromJSON!(typeof(t.front))(js))(json.array).array;
-        }
-        else static if (isAssociativeArray!T)
-        {
-            JSONValue[string] jsonAA = json.object;
-            foreach (k, v; jsonAA)
-            {
-                t[fromJSON!(typeof(t.keys.front))(parseJSON(k))] = fromJSON!(typeof(t
-                    .values.front))(v);
-            }
-        }
-        else
-        {
+        
+        
             mixin ("JSONValue[string] jsonAA = json.object;");
             foreach (name; __traits(allMembers, T))
             {
@@ -337,9 +352,15 @@ T fromJSON(T)(JSONValue json)
                         .stringof ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
                 }
             }
-        }
+        
         return t;
     }
+}
+
+
+/// Convert from JSONValue to any other type
+T fromJSON(T)(JSONValue json){
+    return fromJSONImpl!T(json);
 }
 
 
