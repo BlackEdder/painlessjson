@@ -326,14 +326,9 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
     {
         return T._fromJSON(json);
     }
-    else
+    else static if(hasAccessibleDefaultsConstructor!(T))
     {
-        T t;
-        static if (is(T==class) && __traits(compiles,
-            new T))
-        {
-            t = new T;
-        }
+        T t = getIntstanceFromDefaultConstructor!T;
         
         
             mixin ("JSONValue[string] jsonAA = json.object;");
@@ -363,6 +358,30 @@ T fromJSON(T)(JSONValue json){
     return fromJSONImpl!T(json);
 }
 
+
+template hasAccessibleDefaultsConstructor(T)
+{
+    static bool helper()
+    {
+        return (is(T==struct) && __traits(compiles,{T t;}))
+            || (is(T==class) && __traits(compiles, {T t = new T;}));
+    }
+
+    enum bool hasAccessibleDefaultsConstructor = helper();
+}
+
+T getIntstanceFromDefaultConstructor(T)()
+{
+    static if(is(T==struct) && __traits(compiles,{T t;}))
+    {
+        return T();
+    } else static if(is(T==class) && __traits(compiles, {T t = new T;}))
+    {
+        return new T();
+    }
+
+
+}
 
 /// Converting common types
 unittest
