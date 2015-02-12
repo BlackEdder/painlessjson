@@ -490,3 +490,11 @@ unittest
 	point[1] = 6;
 	assert(point== fromJSON!(Tuple!(int,int))(parseJSON(q{{"_0":5,"_1":6}})));
 }
+
+/// No default constructor
+unittest
+{
+    auto p = fromJSON!PointUseConstructor(parseJSON(q{{"x":2, "y":5}}));
+    assert(p.x == 2);
+    assert(p.y == 5);
+}
