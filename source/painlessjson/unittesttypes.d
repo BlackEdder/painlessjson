@@ -196,3 +196,29 @@ struct PointSerializationIgnore
     }
 
 }
+
+///
+struct PointUseConstructor
+{
+    @disable this();
+    double x = 0; ///
+    double y = 1; ///
+    this(double x, double y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+
+    string foo()
+    {
+        writeln("Functions should not be called");
+        return "Noooooo!";
+    }
+
+    static string bar()
+    {
+        writeln("Static functions should not be called");
+        return "Noooooo!";
+    }
+
+}
