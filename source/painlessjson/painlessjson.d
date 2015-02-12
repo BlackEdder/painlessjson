@@ -406,7 +406,7 @@ T getInstanceFromCustomConstructor(T, alias Ctor)(JSONValue json)
     foreach(i ; staticIota!(0, params.length))
     {
         enum paramName = params[i];
-        if (paramName in json)
+        if (paramName in json.object)
         {
             args[i] = fromJSON!(Types[i])(json[paramName]);
         }
