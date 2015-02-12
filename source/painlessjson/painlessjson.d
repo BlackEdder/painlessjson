@@ -349,6 +349,21 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
             }
         
         return t;
+    } else static if(hasAccessibleConstructor!T)
+    {
+        pragma(msg, "hasAccessibleConstructor");
+        if (__traits(hasMember, T, "__ctor"))
+        {
+            alias Overloads = TypeTuple!(__traits(getOverloads, T, "__ctor"));
+            foreach(overload ; Overloads)
+            {
+                static if(__traits(compiles, {return getInstanceFromCustomConstructor!(T, overload)(json);}))
+                {
+                    return getInstanceFromCustomConstructor!(T, overload)(json);
+                }
+            }
+            assert(0);
+        }
     }
 }
 
@@ -379,9 +394,63 @@ T getIntstanceFromDefaultConstructor(T)()
     {
         return new T();
     }
-
-
 }
+
+T getInstanceFromCustomConstructor(T, alias Ctor)(JSONValue json)
+{
+    import std.typecons : staticIota;
+    enum params = ParameterIdentifierTuple!(Ctor);
+    alias defaults = ParameterDefaultValueTuple!(Ctor);
+    alias Types = ParameterTypeTuple!(Ctor);
+    Tuple!(Types) args;
+    foreach(i ; staticIota!(0, params.length))
+    {
+        enum paramName = params[i];
+        if (paramName in json)
+        {
+            args[i] = fromJSON!(Types[i])(json[paramName]);
+        }
+        else
+        { // no value specified in json
+            static if (is(defaults[i] == void))
+            {
+                throw new JSONException("parameter " ~ paramName ~ " has no default value and was not specified");
+            }
+            else
+            {
+                args[i] = defaults[i];
+            }
+        }
+    }
+    static if (is(T == class)) {
+    return new T(args.expand);
+    }
+    else {
+    return T(args.expand);
+    }
+}
+
+template hasAccessibleConstructor(T)
+{
+    static bool helper()
+    {
+        if (__traits(hasMember, T, "__ctor"))
+        {
+            alias Overloads = TypeTuple!(__traits(getOverloads, T, "__ctor"));
+            foreach(overload ; Overloads)
+            {
+                if(__traits(compiles, getInstanceFromCustomConstructor!(T, overload)(JSONValue())))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    enum bool hasAccessibleConstructor = helper();
+}
+
 
 /// Converting common types
 unittest
