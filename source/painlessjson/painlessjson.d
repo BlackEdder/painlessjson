@@ -351,7 +351,6 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
         return t;
     } else static if(hasAccessibleConstructor!T)
     {
-        pragma(msg, "hasAccessibleConstructor");
         if (__traits(hasMember, T, "__ctor"))
         {
             alias Overloads = TypeTuple!(__traits(getOverloads, T, "__ctor"));
