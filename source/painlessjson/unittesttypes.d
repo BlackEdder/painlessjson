@@ -222,3 +222,23 @@ struct PointUseConstructor
     }
 
 }
+
+///
+struct IdAndName
+{
+    @disable this();
+    string name; ///
+    int id; ///
+    this(int id, string name)
+    {
+        this.id = id;
+        this.name = name;
+    }
+
+    this(int id)
+    {
+        this.id = id;
+        this.name = "Undefined";
+    }
+
+}
