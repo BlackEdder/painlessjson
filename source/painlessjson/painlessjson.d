@@ -566,3 +566,11 @@ unittest
     assert(p.x == 2);
     assert(p.y == 5);
 }
+
+/// Multiple constructors and all JSON-values are there
+unittest
+{
+    auto person = fromJSON!IdAndName(parseJSON(q{{"id":34, "name": "Jason Pain"}}));
+    assert(person.id == 34);
+    assert(person.name == "Jason Pain");
+}
