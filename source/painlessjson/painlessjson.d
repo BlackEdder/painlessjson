@@ -372,6 +372,8 @@ private T fromJSONImpl(T)(JSONValue json) if (!isBuiltinType!T && !is(T
             alias constructorFunctionType = T function(JSONValue value) @system;
             ulong bestOverloadScore = ulong.max;
             constructorFunctionType bestOverload;
+            
+            // Find the constructor overloads that matches our json content the best
             foreach (overload; Overloads)
             {
                 static if (__traits(compiles, 
