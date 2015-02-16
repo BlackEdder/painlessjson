@@ -4,10 +4,9 @@ set -e -o pipefail
 
 dub test --compiler=${DC}
 
-branch=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
-
-if [ "$branch" == "master" ]; then
+if [[ $TRAVIS_BRANCH == 'master' ]] ; then
     if [ ! -z "$GH_TOKEN" ]; then
+        git checkout master
         dub build -b docs --compiler=${DC}
         cd docs
         git init
