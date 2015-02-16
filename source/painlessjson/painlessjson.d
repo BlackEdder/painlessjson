@@ -574,3 +574,11 @@ unittest
     assert(person.id == 34);
     assert(person.name == "Jason Pain");
 }
+
+/// Multiple constructors and some JSON-values are missing
+unittest
+{
+    auto person = fromJSON!IdAndName(parseJSON(q{{"id":34}}));
+    assert(person.id == 34);
+    assert(person.name == "Undefined");
+}
