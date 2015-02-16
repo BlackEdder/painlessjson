@@ -229,6 +229,12 @@ struct IdAndName
     @disable this();
     string name; ///
     int id; ///
+    
+    this(string name)
+    {
+        assert( 0 );
+    }
+    
     this(int id, string name)
     {
         this.id = id;
@@ -240,5 +246,4 @@ struct IdAndName
         this.id = id;
         this.name = "Undefined";
     }
-
 }
