@@ -354,7 +354,7 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
         if (__traits(hasMember, T, "__ctor"))
         {
             alias Overloads = TypeTuple!(__traits(getOverloads, T, "__ctor"));
-            alias T function(JSONValue value) @system constructorFunctionType;
+            alias constructorFunctionType = T function(JSONValue value) @system;
             ulong bestOverloadScore = ulong.max;
             constructorFunctionType bestOverload;
             foreach(overload ; Overloads)
