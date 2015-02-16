@@ -354,14 +354,32 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
         if (__traits(hasMember, T, "__ctor"))
         {
             alias Overloads = TypeTuple!(__traits(getOverloads, T, "__ctor"));
+            alias T function(JSONValue value) @system constructorFunctionType;
+            int bestOverloadScore = int.max;
+            constructorFunctionType bestOverload;
             foreach(overload ; Overloads)
             {
                 static if(__traits(compiles, {return getInstanceFromCustomConstructor!(T, overload)(json);}))
                 {
-                    return getInstanceFromCustomConstructor!(T, overload)(json);
+                    if(jsonValueHasAllFieldsNeeded!(overload)(json))
+                    {
+                        int overloadScore = constructorOverloadScore!(overload)(json);
+                        if(overloadScore<bestOverloadScore)
+                        {
+                            bestOverload = function(JSONValue value)
+                            {
+                                return getInstanceFromCustomConstructor!(T, overload)(value);
+                            };
+                            bestOverloadScore = overloadScore;
+                        }
+                    }
                 }
             }
-            assert(0);
+            if(bestOverloadScore<int.max)
+            {
+                return bestOverload(json);
+            }
+            throw new JSONException("JSONValue can't satisfy any constructor: "~json.toPrettyString);
         }
     }
 }
@@ -427,6 +445,44 @@ T getInstanceFromCustomConstructor(T, alias Ctor)(JSONValue json)
     else {
     return T(args.expand);
     }
+}
+
+bool jsonValueHasAllFieldsNeeded(alias Ctor)(JSONValue json)
+{
+    import std.typecons : staticIota;
+    enum params = ParameterIdentifierTuple!(Ctor);
+    alias defaults = ParameterDefaultValueTuple!(Ctor);
+    alias Types = ParameterTypeTuple!(Ctor);
+    Tuple!(Types) args;
+    foreach(i ; staticIota!(0, params.length))
+    {
+        enum paramName = params[i];
+        if (!(paramName in json.object) && is(defaults[i] == void))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+int constructorOverloadScore(alias Ctor)(JSONValue json)
+{
+    import std.typecons : staticIota;
+    enum params = ParameterIdentifierTuple!(Ctor);
+    alias defaults = ParameterDefaultValueTuple!(Ctor);
+    alias Types = ParameterTypeTuple!(Ctor);
+    Tuple!(Types) args;
+    int overloadScore = json.object.length;
+
+    foreach(i ; staticIota!(0, params.length))
+    {
+        enum paramName = params[i];
+        if (paramName in json.object)
+        {
+            overloadScore--;
+        }
+    }
+    return overloadScore;
 }
 
 template hasAccessibleConstructor(T)
