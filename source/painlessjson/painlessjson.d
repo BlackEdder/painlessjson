@@ -326,14 +326,9 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
     {
         return T._fromJSON(json);
     }
-    else
+    else static if(hasAccessibleDefaultsConstructor!(T))
     {
-        T t;
-        static if (is(T==class) && __traits(compiles,
-            new T))
-        {
-            t = new T;
-        }
+        T t = getIntstanceFromDefaultConstructor!T;
         
         
             mixin ("JSONValue[string] jsonAA = json.object;");
@@ -354,6 +349,38 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
             }
         
         return t;
+    } else static if(hasAccessibleConstructor!T)
+    {
+        if (__traits(hasMember, T, "__ctor"))
+        {
+            alias Overloads = TypeTuple!(__traits(getOverloads, T, "__ctor"));
+            alias T function(JSONValue value) @system constructorFunctionType;
+            ulong bestOverloadScore = ulong.max;
+            constructorFunctionType bestOverload;
+            foreach(overload ; Overloads)
+            {
+                static if(__traits(compiles, {return getInstanceFromCustomConstructor!(T, overload)(json);}))
+                {
+                    if(jsonValueHasAllFieldsNeeded!(overload)(json))
+                    {
+                        ulong overloadScore = constructorOverloadScore!(overload)(json);
+                        if(overloadScore<bestOverloadScore)
+                        {
+                            bestOverload = function(JSONValue value)
+                            {
+                                return getInstanceFromCustomConstructor!(T, overload)(value);
+                            };
+                            bestOverloadScore = overloadScore;
+                        }
+                    }
+                }
+            }
+            if(bestOverloadScore<ulong.max)
+            {
+                return bestOverload(json);
+            }
+            throw new JSONException("JSONValue can't satisfy any constructor: "~json.toPrettyString);
+        }
     }
 }
 
@@ -361,6 +388,122 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
 /// Convert from JSONValue to any other type
 T fromJSON(T)(JSONValue json){
     return fromJSONImpl!T(json);
+}
+
+
+template hasAccessibleDefaultsConstructor(T)
+{
+    static bool helper()
+    {
+        return (is(T==struct) && __traits(compiles,{T t;}))
+            || (is(T==class) && __traits(compiles, {T t = new T;}));
+    }
+
+    enum bool hasAccessibleDefaultsConstructor = helper();
+}
+
+T getIntstanceFromDefaultConstructor(T)()
+{
+    static if(is(T==struct) && __traits(compiles,{T t;}))
+    {
+        return T();
+    } else static if(is(T==class) && __traits(compiles, {T t = new T;}))
+    {
+        return new T();
+    }
+}
+
+T getInstanceFromCustomConstructor(T, alias Ctor)(JSONValue json)
+{
+    import std.typecons : staticIota;
+    enum params = ParameterIdentifierTuple!(Ctor);
+    alias defaults = ParameterDefaultValueTuple!(Ctor);
+    alias Types = ParameterTypeTuple!(Ctor);
+    Tuple!(Types) args;
+    foreach(i ; staticIota!(0, params.length))
+    {
+        enum paramName = params[i];
+        if (paramName in json.object)
+        {
+            args[i] = fromJSON!(Types[i])(json[paramName]);
+        }
+        else
+        { // no value specified in json
+            static if (is(defaults[i] == void))
+            {
+                throw new JSONException("parameter " ~ paramName ~ " has no default value and was not specified");
+            }
+            else
+            {
+                args[i] = defaults[i];
+            }
+        }
+    }
+    static if (is(T == class)) {
+    return new T(args.expand);
+    }
+    else {
+    return T(args.expand);
+    }
+}
+
+bool jsonValueHasAllFieldsNeeded(alias Ctor)(JSONValue json)
+{
+    import std.typecons : staticIota;
+    enum params = ParameterIdentifierTuple!(Ctor);
+    alias defaults = ParameterDefaultValueTuple!(Ctor);
+    alias Types = ParameterTypeTuple!(Ctor);
+    Tuple!(Types) args;
+    foreach(i ; staticIota!(0, params.length))
+    {
+        enum paramName = params[i];
+        if (!(paramName in json.object) && is(defaults[i] == void))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+ulong constructorOverloadScore(alias Ctor)(JSONValue json)
+{
+    import std.typecons : staticIota;
+    enum params = ParameterIdentifierTuple!(Ctor);
+    alias defaults = ParameterDefaultValueTuple!(Ctor);
+    alias Types = ParameterTypeTuple!(Ctor);
+    Tuple!(Types) args;
+    ulong overloadScore = json.object.length;
+
+    foreach(i ; staticIota!(0, params.length))
+    {
+        enum paramName = params[i];
+        if (paramName in json.object)
+        {
+            overloadScore--;
+        }
+    }
+    return overloadScore;
+}
+
+template hasAccessibleConstructor(T)
+{
+    static bool helper()
+    {
+        if (__traits(hasMember, T, "__ctor"))
+        {
+            alias Overloads = TypeTuple!(__traits(getOverloads, T, "__ctor"));
+            foreach(overload ; Overloads)
+            {
+                if(__traits(compiles, getInstanceFromCustomConstructor!(T, overload)(JSONValue())))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    enum bool hasAccessibleConstructor = helper();
 }
 
 
@@ -470,4 +613,28 @@ unittest
 	point[0] = 5;
 	point[1] = 6;
 	assert(point== fromJSON!(Tuple!(int,int))(parseJSON(q{{"_0":5,"_1":6}})));
+}
+
+/// No default constructor
+unittest
+{
+    auto p = fromJSON!PointUseConstructor(parseJSON(q{{"x":2, "y":5}}));
+    assert(p.x == 2);
+    assert(p.y == 5);
+}
+
+/// Multiple constructors and all JSON-values are there
+unittest
+{
+    auto person = fromJSON!IdAndName(parseJSON(q{{"id":34, "name": "Jason Pain"}}));
+    assert(person.id == 34);
+    assert(person.name == "Jason Pain");
+}
+
+/// Multiple constructors and some JSON-values are missing
+unittest
+{
+    auto person = fromJSON!IdAndName(parseJSON(q{{"id":34}}));
+    assert(person.id == 34);
+    assert(person.name == "Undefined");
 }

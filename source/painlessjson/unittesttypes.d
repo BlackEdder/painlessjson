@@ -196,3 +196,54 @@ struct PointSerializationIgnore
     }
 
 }
+
+///
+struct PointUseConstructor
+{
+    @disable this();
+    double x = 0; ///
+    double y = 1; ///
+    this(double x, double y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+
+    string foo()
+    {
+        writeln("Functions should not be called");
+        return "Noooooo!";
+    }
+
+    static string bar()
+    {
+        writeln("Static functions should not be called");
+        return "Noooooo!";
+    }
+
+}
+
+///
+struct IdAndName
+{
+    @disable this();
+    string name; ///
+    int id; ///
+    
+    this(string name)
+    {
+        assert( 0 );
+    }
+    
+    this(int id, string name)
+    {
+        this.id = id;
+        this.name = name;
+    }
+
+    this(int id)
+    {
+        this.id = id;
+        this.name = "Undefined";
+    }
+}
