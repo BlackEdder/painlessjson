@@ -355,7 +355,7 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
         {
             alias Overloads = TypeTuple!(__traits(getOverloads, T, "__ctor"));
             alias T function(JSONValue value) @system constructorFunctionType;
-            int bestOverloadScore = int.max;
+            ulong bestOverloadScore = ulong.max;
             constructorFunctionType bestOverload;
             foreach(overload ; Overloads)
             {
@@ -363,7 +363,7 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
                 {
                     if(jsonValueHasAllFieldsNeeded!(overload)(json))
                     {
-                        int overloadScore = constructorOverloadScore!(overload)(json);
+                        ulong overloadScore = constructorOverloadScore!(overload)(json);
                         if(overloadScore<bestOverloadScore)
                         {
                             bestOverload = function(JSONValue value)
@@ -375,7 +375,7 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
                     }
                 }
             }
-            if(bestOverloadScore<int.max)
+            if(bestOverloadScore<ulong.max)
             {
                 return bestOverload(json);
             }
@@ -465,14 +465,14 @@ bool jsonValueHasAllFieldsNeeded(alias Ctor)(JSONValue json)
     return true;
 }
 
-int constructorOverloadScore(alias Ctor)(JSONValue json)
+ulong constructorOverloadScore(alias Ctor)(JSONValue json)
 {
     import std.typecons : staticIota;
     enum params = ParameterIdentifierTuple!(Ctor);
     alias defaults = ParameterDefaultValueTuple!(Ctor);
     alias Types = ParameterTypeTuple!(Ctor);
     Tuple!(Types) args;
-    int overloadScore = json.object.length;
+    ulong overloadScore = json.object.length;
 
     foreach(i ; staticIota!(0, params.length))
     {
