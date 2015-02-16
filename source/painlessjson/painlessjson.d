@@ -12,7 +12,7 @@ version(unittest)
     import std.algorithm;
     import std.stdio;
     import painlessjson.unittesttypes;
-	import std.typecons;
+    import std.typecons;
 
     bool jsonEquals(string value1, string value2)
     {
@@ -37,20 +37,30 @@ version(unittest)
 }
 
 //See if we can use something else than __traits(compiles, (T t){JSONValue(t);})
-private JSONValue toJSONImpl(T)(T object) if (__traits(compiles, (T t){JSONValue(t);})){
+private JSONValue toJSONImpl(T)(T object) if (__traits(compiles, (T t)
+{
+    JSONValue(t);
+}
+))
+{
     return JSONValue(object);
 }
 
 
 //See if we can use something else than !__traits(compiles, (T t){JSONValue(t);})
-private JSONValue toJSONImpl(T)(T object) if (isArray!T && !__traits(compiles, (T t){JSONValue(t);}))
+private JSONValue toJSONImpl(T)(T object) if (isArray!T && !__traits(compiles,
+    (T t)
+    {
+        JSONValue(t);
+}
+))
 {
     JSONValue[] jsonRange;
     jsonRange = map!((el) => el.toJSON)(object).array;
     return JSONValue(jsonRange);
 }
 
-private JSONValue toJSONImpl(T)(T object)if (isAssociativeArray!T)
+private JSONValue toJSONImpl(T)(T object) if (isAssociativeArray!T)
 {
     JSONValue[string] jsonAA;
     foreach (key, value; object)
@@ -59,12 +69,15 @@ private JSONValue toJSONImpl(T)(T object)if (isAssociativeArray!T)
     }
     return JSONValue(jsonAA);
 }
-    
 
-
-private JSONValue toJSONImpl(T)(T object)if (!isBuiltinType!T && !__traits(compiles, (T t){JSONValue(t);}))
+private JSONValue toJSONImpl(T)(T object) if (!isBuiltinType!T && !__traits(compiles,
+    (T t)
+    {
+        JSONValue(t);
+}
+))
 {
-  static if (__traits(compiles, (T t)
+    static if (__traits(compiles, (T t)
     {
         return object._toJSON();
     }
@@ -95,10 +108,13 @@ private JSONValue toJSONImpl(T)(T object)if (!isBuiltinType!T && !__traits(compi
     }
 }
 
+
 /// Template function that converts any object to JSON
-JSONValue toJSON(T)(T t){
+JSONValue toJSON(T)(T t)
+{
     return toJSONImpl!T(t);
 }
+
 
 /// Converting common types
 unittest
@@ -192,23 +208,26 @@ unittest
     assert(aaStruct.toJSON.toString == q{{"0":{"x":-1,"y":1},"1":{"x":2,"y":0}}});
 }
 
+
 /// Unnamed tuples
 unittest
 {
-	Tuple!(int, int) point;
-	point[0] = 5;
-	point[1] = 6;
-	assert(jsonEquals(toJSON(point), q{{"_0":5,"_1":6}}));
+    Tuple!(int, int) point;
+    point[0] = 5;
+    point[1] = 6;
+    assert(jsonEquals(toJSON(point), q{{"_0":5,"_1":6}}));
 }
+
 
 /// Named tuples
 unittest
 {
-	Tuple!(int, "x", int, "y") point;
-	point.x = 5;
-	point.y = 6;
-	assert(point== fromJSON!(Tuple!(int,"x",int,"y"))(parseJSON(q{{"x":5,"y":6}})));
+    Tuple!(int, "x", int, "y") point;
+    point.x = 5;
+    point.y = 6;
+    assert(point == fromJSON!(Tuple!(int, "x", int, "y"))(parseJSON(q{{"x":5,"y":6}})));
 }
+
 
 /// Overloaded toJSON
 unittest
@@ -266,12 +285,13 @@ unittest
     assert(z.toJSON.toString == q{{"x":0,"y":1,"add":"bla"}});
 }
 
-
-private T fromJSONImpl(T)(JSONValue json) if(is(T == JSONValue)){
+private T fromJSONImpl(T)(JSONValue json) if (is(T == JSONValue))
+{
     return json;
 }
 
-private T fromJSONImpl(T)(JSONValue json) if(isIntegral!T){
+private T fromJSONImpl(T)(JSONValue json) if (isIntegral!T)
+{
     return to!T(json.integer);
 }
 
@@ -279,8 +299,7 @@ private T fromJSONImpl(T)(JSONValue json) if (isFloatingPoint!T)
 {
     if (json.type == JSON_TYPE.INTEGER)
         return to!T(json.integer);
-    else
-        return to!T(json.floating);
+    else return to!T(json.floating);
 }
 
 private T fromJSONImpl(T)(JSONValue json) if (is(T == string))
@@ -292,11 +311,8 @@ private T fromJSONImpl(T)(JSONValue json) if (isBoolean!T)
 {
     if (json.type == JSON_TYPE.TRUE)
         return true;
-    else
-        return false;
+    else return false;
 }
-
-
 
 private T fromJSONImpl(T)(JSONValue json) if (isArray!T && !is(T == string))
 {
@@ -316,7 +332,8 @@ private T fromJSONImpl(T)(JSONValue json) if (isAssociativeArray!T)
     return t;
 }
 
-private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValue))
+private T fromJSONImpl(T)(JSONValue json) if (!isBuiltinType!T && !is(T
+    == JSONValue))
 {
     static if (__traits(compiles, 
     {
@@ -326,30 +343,28 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
     {
         return T._fromJSON(json);
     }
-    else static if(hasAccessibleDefaultsConstructor!(T))
+    else static if (hasAccessibleDefaultsConstructor!(T))
     {
         T t = getIntstanceFromDefaultConstructor!T;
-        
-        
-            mixin ("JSONValue[string] jsonAA = json.object;");
-            foreach (name; __traits(allMembers, T))
+        mixin ("JSONValue[string] jsonAA = json.object;");
+        foreach (name; __traits(allMembers, T))
+        {
+            static if (__traits(compiles, mixin ("t." ~ name ~ "= fromJSON!("
+                ~ (typeof(__traits(getMember, t, name))).stringof
+                ~ ")(jsonAA[\"aFieldName\"])")) && !hasAnyOfTheseAnnotations!(__traits(getMember,
+                t, name), SerializeIgnore, SerializeFromIgnore)
+                && isFieldOrProperty!(__traits(getMember, t, name)))
             {
-                static if (__traits(compiles, mixin ("t." ~ name
+                enum string fromName = serializationFromName!(__traits(getMember,
+                    t, name), name);
+                mixin ("if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name
                     ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
-                    .stringof ~ ")(jsonAA[\"aFieldName\"])")) && !hasAnyOfTheseAnnotations!(__traits(getMember,
-                    t, name), SerializeIgnore, SerializeFromIgnore)
-                    && isFieldOrProperty!(__traits(getMember, t, name)))
-                {
-                    enum string fromName = serializationFromName!(__traits(getMember,
-                        t, name), name);
-                    mixin ("if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name
-                        ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
-                        .stringof ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
-                }
+                    .stringof ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
             }
-        
+        }
         return t;
-    } else static if(hasAccessibleConstructor!T)
+    }
+    else static if (hasAccessibleConstructor!T)
     {
         if (__traits(hasMember, T, "__ctor"))
         {
@@ -357,46 +372,61 @@ private T fromJSONImpl(T)(JSONValue json) if(!isBuiltinType!T && !is(T==JSONValu
             alias constructorFunctionType = T function(JSONValue value) @system;
             ulong bestOverloadScore = ulong.max;
             constructorFunctionType bestOverload;
-            foreach(overload ; Overloads)
+            foreach (overload; Overloads)
             {
-                static if(__traits(compiles, {return getInstanceFromCustomConstructor!(T, overload)(json);}))
+                static if (__traits(compiles, 
                 {
-                    if(jsonValueHasAllFieldsNeeded!(overload)(json))
+                    return getInstanceFromCustomConstructor!(T, overload)(json);
+                }
+                ))
+                {
+                    if (jsonValueHasAllFieldsNeeded!(overload)(json))
                     {
                         ulong overloadScore = constructorOverloadScore!(overload)(json);
-                        if(overloadScore<bestOverloadScore)
+                        if (overloadScore < bestOverloadScore)
                         {
                             bestOverload = function(JSONValue value)
                             {
-                                return getInstanceFromCustomConstructor!(T, overload)(value);
-                            };
+                                return getInstanceFromCustomConstructor!(T,
+                                    overload)(value);
+                            }
+
+                            ;
                             bestOverloadScore = overloadScore;
                         }
                     }
                 }
             }
-            if(bestOverloadScore<ulong.max)
+            if (bestOverloadScore < ulong.max)
             {
                 return bestOverload(json);
             }
-            throw new JSONException("JSONValue can't satisfy any constructor: "~json.toPrettyString);
+            throw new JSONException("JSONValue can't satisfy any constructor: "
+                ~ json.toPrettyString);
         }
     }
 }
 
 
 /// Convert from JSONValue to any other type
-T fromJSON(T)(JSONValue json){
+T fromJSON(T)(JSONValue json)
+{
     return fromJSONImpl!T(json);
 }
-
 
 template hasAccessibleDefaultsConstructor(T)
 {
     static bool helper()
     {
-        return (is(T==struct) && __traits(compiles,{T t;}))
-            || (is(T==class) && __traits(compiles, {T t = new T;}));
+        return (is(T == struct) && __traits(compiles, 
+        {
+            T t;
+        }
+        )) || (is(T == class) && __traits(compiles, 
+        {
+            T t = new T;
+        }
+        ));
     }
 
     enum bool hasAccessibleDefaultsConstructor = helper();
@@ -404,10 +434,19 @@ template hasAccessibleDefaultsConstructor(T)
 
 T getIntstanceFromDefaultConstructor(T)()
 {
-    static if(is(T==struct) && __traits(compiles,{T t;}))
+    static if (is(T == struct) && __traits(compiles, 
+    {
+        T t;
+    }
+    ))
     {
         return T();
-    } else static if(is(T==class) && __traits(compiles, {T t = new T;}))
+    }
+    else static if (is(T == class) && __traits(compiles, 
+    {
+        T t = new T;
+    }
+    ))
     {
         return new T();
     }
@@ -416,11 +455,12 @@ T getIntstanceFromDefaultConstructor(T)()
 T getInstanceFromCustomConstructor(T, alias Ctor)(JSONValue json)
 {
     import std.typecons : staticIota;
+
     enum params = ParameterIdentifierTuple!(Ctor);
     alias defaults = ParameterDefaultValueTuple!(Ctor);
     alias Types = ParameterTypeTuple!(Ctor);
     Tuple!(Types) args;
-    foreach(i ; staticIota!(0, params.length))
+    foreach (i; staticIota!(0, params.length))
     {
         enum paramName = params[i];
         if (paramName in json.object)
@@ -428,10 +468,12 @@ T getInstanceFromCustomConstructor(T, alias Ctor)(JSONValue json)
             args[i] = fromJSON!(Types[i])(json[paramName]);
         }
         else
-        { // no value specified in json
+        {
+             // no value specified in json
             static if (is(defaults[i] == void))
             {
-                throw new JSONException("parameter " ~ paramName ~ " has no default value and was not specified");
+                throw new JSONException("parameter " ~ paramName
+                    ~ " has no default value and was not specified");
             }
             else
             {
@@ -439,22 +481,25 @@ T getInstanceFromCustomConstructor(T, alias Ctor)(JSONValue json)
             }
         }
     }
-    static if (is(T == class)) {
-    return new T(args.expand);
+    static if (is(T == class))
+    {
+        return new T(args.expand);
     }
-    else {
-    return T(args.expand);
+    else
+    {
+        return T(args.expand);
     }
 }
 
 bool jsonValueHasAllFieldsNeeded(alias Ctor)(JSONValue json)
 {
     import std.typecons : staticIota;
+
     enum params = ParameterIdentifierTuple!(Ctor);
     alias defaults = ParameterDefaultValueTuple!(Ctor);
     alias Types = ParameterTypeTuple!(Ctor);
     Tuple!(Types) args;
-    foreach(i ; staticIota!(0, params.length))
+    foreach (i; staticIota!(0, params.length))
     {
         enum paramName = params[i];
         if (!(paramName in json.object) && is(defaults[i] == void))
@@ -468,13 +513,13 @@ bool jsonValueHasAllFieldsNeeded(alias Ctor)(JSONValue json)
 ulong constructorOverloadScore(alias Ctor)(JSONValue json)
 {
     import std.typecons : staticIota;
+
     enum params = ParameterIdentifierTuple!(Ctor);
     alias defaults = ParameterDefaultValueTuple!(Ctor);
     alias Types = ParameterTypeTuple!(Ctor);
     Tuple!(Types) args;
     ulong overloadScore = json.object.length;
-
-    foreach(i ; staticIota!(0, params.length))
+    foreach (i; staticIota!(0, params.length))
     {
         enum paramName = params[i];
         if (paramName in json.object)
@@ -492,9 +537,10 @@ template hasAccessibleConstructor(T)
         if (__traits(hasMember, T, "__ctor"))
         {
             alias Overloads = TypeTuple!(__traits(getOverloads, T, "__ctor"));
-            foreach(overload ; Overloads)
+            foreach (overload; Overloads)
             {
-                if(__traits(compiles, getInstanceFromCustomConstructor!(T, overload)(JSONValue())))
+                if (__traits(compiles, getInstanceFromCustomConstructor!(T,
+                    overload)(JSONValue())))
                 {
                     return true;
                 }
@@ -606,14 +652,16 @@ unittest
     assert(p.z == 15);
 }
 
+
 /// Unnamed tuples
 unittest
 {
-	Tuple!(int, int) point;
-	point[0] = 5;
-	point[1] = 6;
-	assert(point== fromJSON!(Tuple!(int,int))(parseJSON(q{{"_0":5,"_1":6}})));
+    Tuple!(int, int) point;
+    point[0] = 5;
+    point[1] = 6;
+    assert(point == fromJSON!(Tuple!(int, int))(parseJSON(q{{"_0":5,"_1":6}})));
 }
+
 
 /// No default constructor
 unittest
@@ -623,6 +671,7 @@ unittest
     assert(p.y == 5);
 }
 
+
 /// Multiple constructors and all JSON-values are there
 unittest
 {
@@ -630,6 +679,7 @@ unittest
     assert(person.id == 34);
     assert(person.name == "Jason Pain");
 }
+
 
 /// Multiple constructors and some JSON-values are missing
 unittest

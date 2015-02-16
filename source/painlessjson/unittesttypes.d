@@ -5,7 +5,6 @@ import std.json;
 import std.algorithm;
 import std.stdio;
 import painlessjson.painlessjson;
-
 ///
 struct Point
 {
@@ -31,11 +30,12 @@ struct Point
 
 }
 
+
 ///
 class PointC
 {
     ///
-    double x = 0;  
+    double x = 0;
     double y = 1;
     this()
     {
@@ -169,6 +169,7 @@ struct PointSerializationName
 
 }
 
+
 ///
 struct PointSerializationIgnore
 {
@@ -184,18 +185,21 @@ struct PointSerializationIgnore
         z = z_;
     }
 
+    
     ///
     @SerializeIgnore @property double foo()
     {
         return 0.1;
     }
 
+    
     ///
     @SerializeIgnore @property void foo(double a)
     {
     }
 
 }
+
 
 ///
 struct PointUseConstructor
@@ -223,6 +227,7 @@ struct PointUseConstructor
 
 }
 
+
 ///
 struct IdAndName
 {
@@ -232,9 +237,9 @@ struct IdAndName
     
     this(string name)
     {
-        assert( 0 );
+        assert(0);
     }
-    
+
     this(int id, string name)
     {
         this.id = id;
@@ -246,4 +251,5 @@ struct IdAndName
         this.id = id;
         this.name = "Undefined";
     }
+
 }
