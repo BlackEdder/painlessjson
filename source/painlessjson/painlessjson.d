@@ -120,18 +120,18 @@ JSONValue toJSON(T)(T t)
 /// Converting common types
 unittest
 {
-    assert(5.toJSON!int == JSONValue(5));
-    assert(4.toJSON != JSONValue(5));
-    assert(5.4.toJSON == JSONValue(5.4));
-    assert(toJSON("test") == JSONValue("test"));
-    assert(toJSON(JSONValue("test")) == JSONValue("test"));
+    assertEqual(5.toJSON!int, JSONValue(5));
+    assert(4.toJSON != JSONValue(5));//TODO: Wait for DUnit to implement assertNotEqual
+    assertEqual(5.4.toJSON, JSONValue(5.4));
+    assertEqual(toJSON("test"), JSONValue("test"));
+    assertEqual(toJSON(JSONValue("test")), JSONValue("test"));
 }
 
 
 /// Converting InputRanges
 unittest
 {
-    assert([1, 2].toJSON.toString == "[1,2]");
+    assertEqual([1, 2].toJSON.toString, "[1,2]");
 }
 
 
@@ -139,7 +139,7 @@ unittest
 unittest
 {
     Point p;
-    assert(toJSON(p).toString == q{{"x":0,"y":1}});
+    assertEqual(toJSON(p).toString, q{{"x":0,"y":1}});
 }
 
 
@@ -147,7 +147,7 @@ unittest
 unittest
 {
     Point[] ps = [Point(-1, 1), Point(2, 3)];
-    assert(toJSON(ps).toString == q{[{"x":-1,"y":1},{"x":2,"y":3}]});
+    assertEqual(toJSON(ps).toString, q{[{"x":-1,"y":1},{"x":2,"y":3}]});
 }
 
 
@@ -155,7 +155,7 @@ unittest
 unittest
 {
     PointC p = new PointC(1, -2);
-    assert(toJSON(p).toString == q{{"x":1,"y":-2}});
+    assertEqual(toJSON(p).toString, q{{"x":1,"y":-2}});
 }
 
 
@@ -163,7 +163,7 @@ unittest
 unittest
 {
     PointPrivate p = new PointPrivate(-1, 2);
-    assert(toJSON(p).toString == q{{"x":-1,"y":2}});
+    assertEqual(toJSON(p).toString, q{{"x":-1,"y":2}});
 }
 
 
@@ -171,7 +171,7 @@ unittest
 unittest
 {
     auto p = PointPrivateProperty(-1, 2);
-    assert(jsonEquals(toJSON(p), q{{"x":-1,"y":2,"z":1}}));
+    assertEqual(toJSON(p).toString, q{{"x":-1,"y":2,"z":1}});
 }
 
 
@@ -179,7 +179,7 @@ unittest
 unittest
 {
     auto p = PointSerializationName(-1, 2);
-    assert(jsonEquals(toJSON(p), q{{"xOut":-1,"yOut":2}}));
+    assertEqual(toJSON(p).toString, q{{"yOut":2,"xOut":-1}});
 }
 
 
@@ -187,7 +187,7 @@ unittest
 unittest
 {
     auto p = PointSerializationIgnore(-1, 5, 4);
-    assert(jsonEquals(toJSON(p), q{{"z":5}}));
+    assertEqual(toJSON(p).toString, q{{"z":5}});
 }
 
 
@@ -195,7 +195,7 @@ unittest
 unittest
 {
     PointC[] ps = [new PointC(-1, 1), new PointC(2, 3)];
-    assert(toJSON(ps).toString == q{[{"x":-1,"y":1},{"x":2,"y":3}]});
+    assertEqual(toJSON(ps).toString, q{[{"x":-1,"y":1},{"x":2,"y":3}]});
 }
 
 
@@ -206,7 +206,7 @@ unittest
     // In JSON (D) only string based associative arrays are supported, so:
     assert(aa.toJSON.toString == q{{"0":"a","1":"b"}});
     Point[int] aaStruct = [0 : Point(-1, 1), 1 : Point(2, 0)];
-    assert(aaStruct.toJSON.toString == q{{"0":{"x":-1,"y":1},"1":{"x":2,"y":0}}});
+    assertEqual(aaStruct.toJSON.toString, q{{"0":{"x":-1,"y":1},"1":{"x":2,"y":0}}});
 }
 
 
@@ -216,7 +216,7 @@ unittest
     Tuple!(int, int) point;
     point[0] = 5;
     point[1] = 6;
-    assert(jsonEquals(toJSON(point), q{{"_0":5,"_1":6}}));
+    assertEqual(toJSON(point).toString, q{{"_0":5,"_1":6}});
 }
 
 
@@ -226,7 +226,7 @@ unittest
     Tuple!(int, "x", int, "y") point;
     point.x = 5;
     point.y = 6;
-    assert(point == fromJSON!(Tuple!(int, "x", int, "y"))(parseJSON(q{{"x":5,"y":6}})));
+    assertEqual(point, fromJSON!(Tuple!(int, "x", int, "y"))(parseJSON(q{{"x":5,"y":6}})));
 }
 
 
@@ -247,7 +247,7 @@ unittest
     }
 
     auto a = new A;
-    assert(a.toJSON.toString == q{{"x":0}});
+    assertEqual(a.toJSON.toString, q{{"x":0}});
     
     class B
     {
@@ -266,7 +266,7 @@ unittest
     }
 
     auto b = new B;
-    assert(b.toJSON.toString == q{{"x":0,"y":1}});
+    assertEqual(b.toJSON.toString, q{{"x":0,"y":1}});
     
     class Z
     {
@@ -283,7 +283,7 @@ unittest
     }
 
     auto z = new Z;
-    assert(z.toJSON.toString == q{{"x":0,"y":1,"add":"bla"}});
+    assertEqual(z.toJSON.toString, q{{"x":0,"y":1,"add":"bla"}});
 }
 
 private T fromJSONImpl(T)(JSONValue json) if (is(T == JSONValue))
@@ -559,20 +559,20 @@ template hasAccessibleConstructor(T)
 /// Converting common types
 unittest
 {
-    assert(fromJSON!int(JSONValue(1)) == 1);
-    assert(fromJSON!double(JSONValue(1.0)) == 1);
-    assert(fromJSON!double(JSONValue(1.3)) == 1.3);
-    assert(fromJSON!string(JSONValue("str")) == "str");
-    assert(fromJSON!bool(JSONValue(true)) == true);
-    assert(fromJSON!bool(JSONValue(false)) == false);
-    assert(fromJSON!JSONValue(JSONValue(true)) == JSONValue(true));
+    assertEqual(fromJSON!int(JSONValue(1)), 1);
+    assertEqual(fromJSON!double(JSONValue(1.0)), 1);
+    assertEqual(fromJSON!double(JSONValue(1.3)), 1.3);
+    assertEqual(fromJSON!string(JSONValue("str")), "str");
+    assertEqual(fromJSON!bool(JSONValue(true)), true);
+    assertEqual(fromJSON!bool(JSONValue(false)), false);
+    assertEqual(fromJSON!JSONValue(JSONValue(true)), JSONValue(true));
 }
 
 
 /// Converting arrays
 unittest
 {
-    assert(equal(fromJSON!(int[])(toJSON([1, 2])), [1, 2]));
+    assertEqual(fromJSON!(int[])(toJSON([1, 2])), [1, 2]);
 }
 
 
@@ -583,7 +583,7 @@ unittest
     auto aaCpy = fromJSON!(string[int])(toJSON(aa));
     foreach (k, v; aa)
     {
-        assert(aaCpy[k] == v);
+        assertEqual(aaCpy[k], v);
     }
 }
 
@@ -592,17 +592,17 @@ unittest
 unittest
 {
     auto p = fromJSON!Point(parseJSON(q{{"x":-1,"y":2}}));
-    assert(p.x == -1);
-    assert(p.y == 2);
+    assertEqual(p.x, -1);
+    assertEqual(p.y, 2);
     p = fromJSON!Point(parseJSON(q{{"x":2}}));
-    assert(p.x == 2);
-    assert(p.y == 1);
+    assertEqual(p.x, 2);
+    assertEqual(p.y, 1);
     p = fromJSON!Point(parseJSON(q{{"y":3}}));
-    assert(p.x == 0);
-    assert(p.y == 3);
+    assertEqual(p.x, 0);
+    assertEqual(p.y, 3);
     p = fromJSON!Point(parseJSON(q{{"x":-1,"y":2,"z":3}}));
-    assert(p.x == -1);
-    assert(p.y == 2);
+    assertEqual(p.x, -1);
+    assertEqual(p.y, 2);
 }
 
 
@@ -610,8 +610,8 @@ unittest
 unittest
 {
     auto p = fromJSON!PointC(parseJSON(q{{"x":-1,"y":2}}));
-    assert(p.x == -1);
-    assert(p.y == 2);
+    assertEqual(p.x, -1);
+    assertEqual(p.y, 2);
 }
 
 
@@ -622,8 +622,8 @@ unittest
 unittest
 {
     auto p = fromJSON!PointPrivate(parseJSON(q{{"x":-1,"y":2}}));
-    assert(p.x == -1);
-    assert(p.y == 2);
+    assertEqual(p.x, -1);
+    assertEqual(p.y, 2);
 }
 
 
@@ -632,8 +632,8 @@ unittest
 unittest
 {
     auto p = fromJSON!PointPrivateProperty(parseJSON(q{{"x":-1,"y":2,"z":3}}));
-    assert(p.x == -1);
-    assert(p.y == 2);
+    assertEqual(p.x, -1);
+    assertEqual(p.y, 2);
 }
 
 
@@ -641,8 +641,8 @@ unittest
 unittest
 {
     auto p = fromJSON!PointSerializationName(parseJSON(q{{"xOut":-1,"yOut":2}}));
-    assert(p.x == 2);
-    assert(p.y == -1);
+    assertEqual(p.x, 2);
+    assertEqual(p.y, -1);
 }
 
 
@@ -650,9 +650,9 @@ unittest
 unittest
 {
     auto p = fromJSON!PointSerializationIgnore(parseJSON(q{{"z":15}}));
-    assert(p.x == 0);
-    assert(p.y == 1);
-    assert(p.z == 15);
+    assertEqual(p.x, 0);
+    assertEqual(p.y, 1);
+    assertEqual(p.z, 15);
 }
 
 
@@ -662,7 +662,7 @@ unittest
     Tuple!(int, int) point;
     point[0] = 5;
     point[1] = 6;
-    assert(point == fromJSON!(Tuple!(int, int))(parseJSON(q{{"_0":5,"_1":6}})));
+    assertEqual(point, fromJSON!(Tuple!(int, int))(parseJSON(q{{"_0":5,"_1":6}})));
 }
 
 
@@ -670,8 +670,8 @@ unittest
 unittest
 {
     auto p = fromJSON!PointUseConstructor(parseJSON(q{{"x":2, "y":5}}));
-    assert(p.x == 2);
-    assert(p.y == 5);
+    assertEqual(p.x, 2);
+    assertEqual(p.y, 5);
 }
 
 
@@ -679,8 +679,8 @@ unittest
 unittest
 {
     auto person = fromJSON!IdAndName(parseJSON(q{{"id":34, "name": "Jason Pain"}}));
-    assert(person.id == 34);
-    assert(person.name == "Jason Pain");
+    assertEqual(person.id, 34);
+    assertEqual(person.name, "Jason Pain");
 }
 
 
@@ -688,6 +688,6 @@ unittest
 unittest
 {
     auto person = fromJSON!IdAndName(parseJSON(q{{"id":34}}));
-    assert(person.id == 34);
-    assert(person.name == "Undefined");
+    assertEqual(person.id, 34);
+    assertEqual(person.name, "Undefined");
 }
