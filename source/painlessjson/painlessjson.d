@@ -13,6 +13,7 @@ version(unittest)
     import std.stdio;
     import painlessjson.unittesttypes;
     import std.typecons;
+    import dunit.toolkit;
 
     bool jsonEquals(string value1, string value2)
     {
