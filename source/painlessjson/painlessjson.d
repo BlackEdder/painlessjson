@@ -14,27 +14,6 @@ version(unittest)
     import painlessjson.unittesttypes;
     import std.typecons;
     import dunit.toolkit;
-
-    bool jsonEquals(string value1, string value2)
-    {
-        return jsonEquals(parseJSON(value1), value2);
-    }
-
-    bool jsonEquals(JSONValue value1, string value2)
-    {
-        return jsonEquals(value1, parseJSON(value2));
-    }
-
-    bool jsonEquals(string value1, JSONValue value2)
-    {
-        return jsonEquals(parseJSON(value1), value2);
-    }
-
-    bool jsonEquals(JSONValue value1, JSONValue value2)
-    {
-        return value1.toString == value2.toString;
-    }
-
 }
 
 //See if we can use something else than __traits(compiles, (T t){JSONValue(t);})
