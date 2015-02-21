@@ -240,7 +240,8 @@ class IdAndName
     
     this(string name)
     {
-        assert(0);
+        this.id = -1;
+        this.name = name;
     }
 
     this(int id, string name)
