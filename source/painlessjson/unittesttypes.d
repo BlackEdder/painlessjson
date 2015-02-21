@@ -233,9 +233,8 @@ struct PointUseConstructor
 
 
 ///
-struct IdAndName
+class IdAndName
 {
-    @disable this();
     immutable string name; ///
     immutable int id; ///
     
