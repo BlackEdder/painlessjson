@@ -6,5 +6,17 @@
 	"authors": ["Edwin van Leeuwen","Pierre Krafft"],
 	"license": "BSD 3-clause",
 	"dependencies": {
-	}
+    },
+    "configurations": [
+        {
+            "name": "library",
+            "targetType": "library"
+        },
+        {
+            "name": "unittest",
+            "dependencies": {
+                "dunit": "~>1.0.10"
+            }
+        }
+    ]
 }

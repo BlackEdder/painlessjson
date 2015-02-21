@@ -205,12 +205,12 @@ struct PointSerializationIgnore
 struct PointUseConstructor
 {
     @disable this();
-    double x = 0; ///
-    double y = 1; ///
-    this(double x, double y)
+    immutable double x; ///
+    private double _y; ///
+    this(double x = 0, double y = 1)
     {
         this.x = x;
-        this.y = y;
+        this._y = y;
     }
 
     string foo()
@@ -225,19 +225,23 @@ struct PointUseConstructor
         return "Noooooo!";
     }
 
+    @property double y()
+    {
+        return _y;
+    }
 }
 
 
 ///
-struct IdAndName
+class IdAndName
 {
-    @disable this();
-    string name; ///
-    int id; ///
+    immutable string name; ///
+    immutable int id; ///
     
     this(string name)
     {
-        assert(0);
+        this.id = -1;
+        this.name = name;
     }
 
     this(int id, string name)
