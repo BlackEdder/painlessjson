@@ -71,12 +71,12 @@ class PointPrivate
         return "Noooooo!";
     }
 
-    double x()
+    const double x()
     {
         return _x;
     }
 
-    double y()
+    const double y()
     {
         return _y;
     }
@@ -86,7 +86,7 @@ class PointPrivate
         return new PointPrivate(fromJSON!double(value["x"]), fromJSON!double(value["y"]));
     }
 
-    JSONValue _toJSON()
+    const JSONValue _toJSON()
     {
         JSONValue[string] json;
         json["x"] = JSONValue(x);
@@ -106,13 +106,13 @@ struct PointPrivateProperty
         _y = y_;
     }
 
-    string foo()
+    const string foo()
     {
         writeln("Class functions should not be called");
         return "Noooooo!";
     }
 
-    @property double x()
+    const @property double x()
     {
         return _x;
     }
@@ -122,7 +122,7 @@ struct PointPrivateProperty
         _x = x_;
     }
 
-    @property double y()
+    const @property double y()
     {
         return _y;
     }
@@ -132,12 +132,12 @@ struct PointPrivateProperty
         _y = y_;
     }
 
-    @property double z()
+    const @property double z()
     {
         return 1.0;
     }
 
-    @property void bar(double a, double b)
+    const @property void bar(double a, double b)
     {
         writeln("Functions annotated with @property and more than one variable should not be called");
         assert(0);
