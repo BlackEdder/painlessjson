@@ -389,6 +389,10 @@ private T fromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T && !is(T
 }
 
 private JSONException jsonExceptionCantSatisyConstructor(in JSONValue json){
+    /+
+        toPrettyString does not work with an in/const variable on older D compilers.
+        So if toPrettyString can't be use we fall back to a less constructve error message.
+    +/
     static if (__traits(compiles,json.toPrettyString()))
     {
         return new JSONException("JSONValue can't satisfy any constructor: "
