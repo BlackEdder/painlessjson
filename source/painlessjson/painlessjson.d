@@ -383,12 +383,21 @@ private T fromJSONImpl(T)(const JSONValue json) if (!isBuiltinType!T && !is(T
             {
                 return bestOverload(json);
             }
-            throw new JSONException("JSONValue can't satisfy any constructor: "
-                ~ json.toPrettyString);
+            throw jsonExceptionCantSatisyConstructor(json);
         }
     }
 }
 
+private JSONException jsonExceptionCantSatisyConstructor(const JSONValue json){
+    static if (__traits(compiles,json.toPrettyString()))
+    {
+        return new JSONException("JSONValue can't satisfy any constructor: "
+                ~ json.toPrettyString);
+    } else {
+        return new JSONException("JSONValue can't satisfy any constructor.");
+    }
+    
+}
 
 /// Convert from JSONValue to any other type
 T fromJSON(T)(const JSONValue json)
