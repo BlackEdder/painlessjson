@@ -579,7 +579,16 @@ unittest
         Route[] routes;
     }
 
-    string jsonString = q{{"routes":[ {"duration": "10"} ] }};
+
+    string jsonString = q{[ {"duration": "10"} ]};
+    Route[] routes = parseJSON(jsonString).fromJSON!(Route[]);
+    assertEqual( routes.length, 1 );
+    /*
+       Above works, but below doesn't.. 
+       Might well be because the following fails to compile:
+       Route[] routes = parseJSON(jsonString).fromJSON;
+    */
+    jsonString = q{{"routes":[ {"duration": "10"} ] }};
     assertEqual( parseJSON(jsonString).fromJSON!JourneyPlan.routes.length, 1 );
 }
 
