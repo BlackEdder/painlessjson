@@ -567,6 +567,21 @@ unittest
     assertEqual(fromJSON!(int[])(toJSON([1, 2])), [1, 2]);
 }
 
+/// More complicated array example
+unittest
+{
+    struct Route
+    {
+        string duration;
+    }
+    struct JourneyPlan
+    {
+        Route[] routes;
+    }
+
+    string jsonString = q{{"routes":[ {"duration": 10} ] }};
+    assertEqual( parseJSON(jsonString).fromJSON!JourneyPlan.routes.length, 1 );
+}
 
 /// Associative arrays
 unittest
