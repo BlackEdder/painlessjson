@@ -576,6 +576,7 @@ unittest
     }
     struct JourneyPlan
     {
+        string la = "bla";
         Route[] routes;
     }
 
@@ -583,13 +584,23 @@ unittest
     string jsonString = q{[ {"duration": "10"} ]};
     Route[] routes = parseJSON(jsonString).fromJSON!(Route[]);
     assertEqual( routes.length, 1 );
+
+    JourneyPlan jp;
+    jp.routes = parseJSON(jsonString).fromJSON!(Route[]);
+    assertEqual( jp.routes.length, 1 );
+    jp.routes.length = 0; // Reset
+
+    jsonString = q{{"routes":[ {"duration": "10"} ] }};
+    auto jsonAA = parseJSON(jsonString).object;
+    jp.routes = fromJSON!(Route[])( jsonAA["routes"] );
+    assertEqual( jp.routes.length, 1 );
+    jp.routes.length = 0; // Reset length
     /*
        Above works, but below doesn't.. 
-       Might well be because the following fails to compile:
-       Route[] routes = parseJSON(jsonString).fromJSON;
     */
-    jsonString = q{{"routes":[ {"duration": "10"} ] }};
-    assertEqual( parseJSON(jsonString).fromJSON!JourneyPlan.routes.length, 1 );
+    jp = parseJSON(jsonString).fromJSON!JourneyPlan;
+    assertEqual( jp.la, "bla" );
+    assertEqual( jp.routes.length, 1 );
 }
 
 /// Associative arrays
