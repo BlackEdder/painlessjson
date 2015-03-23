@@ -45,13 +45,12 @@ template serializationToName(alias T, string defaultName)
 {
     static string helper()
     {
-        static if (hasValueAnnotation!(T, SerializedName) && getAnnotation!(T,
-            SerializedName).to)
+        static if (hasValueAnnotation!(T, SerializedName) && getAnnotation!(T, SerializedName).to)
         {
             return getAnnotation!(T, SerializedName).to;
         }
         else static if (hasValueAnnotation!(T, SerializedToName)
-            && getAnnotation!(T, SerializedToName).name)
+                && getAnnotation!(T, SerializedToName).name)
         {
             return getAnnotation!(T, SerializedToName).name;
         }
@@ -69,12 +68,12 @@ template serializationFromName(alias T, string defaultName)
     static string helper()
     {
         static if (hasValueAnnotation!(T, SerializedName) && getAnnotation!(T,
-            SerializedName).from)
+                SerializedName).from)
         {
             return getAnnotation!(T, SerializedName).from;
         }
         else static if (hasValueAnnotation!(T, SerializedFromName)
-            && getAnnotation!(T, SerializedFromName).name)
+                && getAnnotation!(T, SerializedFromName).name)
         {
             return getAnnotation!(T, SerializedFromName).name;
         }

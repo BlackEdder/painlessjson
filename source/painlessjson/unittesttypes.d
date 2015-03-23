@@ -5,6 +5,7 @@ import std.json;
 import std.algorithm;
 import std.stdio;
 import painlessjson.painlessjson;
+
 ///
 struct Point
 {
@@ -29,7 +30,6 @@ struct Point
     }
 
 }
-
 
 ///
 class PointC
@@ -139,7 +139,8 @@ struct PointPrivateProperty
 
     const @property void bar(double a, double b)
     {
-        writeln("Functions annotated with @property and more than one variable should not be called");
+        writeln(
+            "Functions annotated with @property and more than one variable should not be called");
         assert(0);
     }
 
@@ -147,8 +148,8 @@ struct PointPrivateProperty
 
 struct PointSerializationName
 {
-    @SerializedName("xOut", "yOut")double x = 0;
-    @SerializedToName("yOut") @SerializedFromName("xOut")double y = 1;
+    @SerializedName("xOut", "yOut") double x = 0;
+    @SerializedToName("yOut") @SerializedFromName("xOut") double y = 1;
     this(double x_, double y_)
     {
         x = x_;
@@ -169,14 +170,13 @@ struct PointSerializationName
 
 }
 
-
 ///
 struct PointSerializationIgnore
 {
     @SerializeIgnore double x = 0; ///
     @SerializedToName("z") @SerializeFromIgnore double y = 1; ///
     @SerializeToIgnore double z = 2; ///
-    
+
     ///
     this(double x_, double y_, double z_)
     {
@@ -185,21 +185,18 @@ struct PointSerializationIgnore
         z = z_;
     }
 
-    
     ///
     @SerializeIgnore @property double foo()
     {
         return 0.1;
     }
 
-    
     ///
     @SerializeIgnore @property void foo(double a)
     {
     }
 
 }
-
 
 ///
 struct PointUseConstructor
@@ -231,13 +228,12 @@ struct PointUseConstructor
     }
 }
 
-
 ///
 class IdAndName
 {
     immutable string name; ///
     immutable int id; ///
-    
+
     this(string name)
     {
         this.id = -1;
@@ -255,5 +251,4 @@ class IdAndName
         this.id = id;
         this.name = "Undefined";
     }
-
 }
