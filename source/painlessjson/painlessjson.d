@@ -573,15 +573,7 @@ unittest
 /// More complicated array example
 unittest
 {
-    struct Route
-    {
-        string duration;
-    }
-    struct JourneyPlan
-    {
-        string la = "bla";
-        Route[] routes;
-    }
+    import painlessjson.unittesttypes_local_import;
 
 
     string jsonString = q{[ {"duration": "10"} ]};
