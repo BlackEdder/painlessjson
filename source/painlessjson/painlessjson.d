@@ -330,16 +330,19 @@ private T fromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T && !is(T
         foreach (name; __traits(allMembers, T))
         {
             static if (__traits(compiles, mixin ("t." ~ name ~ "= fromJSON!("
-                ~ (typeof(__traits(getMember, t, name))).stringof
+                ~ fullyQualifiedName!(typeof(__traits(getMember, t, name)))
                 ~ ")(jsonAA[\"aFieldName\"])")) && !hasAnyOfTheseAnnotations!(__traits(getMember,
                 t, name), SerializeIgnore, SerializeFromIgnore)
                 && isFieldOrProperty!(__traits(getMember, t, name)))
             {
                 enum string fromName = serializationFromName!(__traits(getMember,
                     t, name), name);
+                static if(!isBuiltinType!(typeof(__traits(getMember, t, name)))){
+                    mixin("import "~moduleName!(typeof(__traits(getMember, t, name)))~";");
+                }
                 mixin ("if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name
-                    ~ "= fromJSON!(" ~ (typeof(__traits(getMember, t, name)))
-                    .stringof ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
+                    ~ "= fromJSON!(" ~ fullyQualifiedName!(typeof(__traits(getMember, t, name)))
+                     ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
             }
         }
         return t;
