@@ -7,6 +7,5 @@ struct Route
 
 struct JourneyPlan
 {
-    string la = "bla";
     Route[] routes;
 }

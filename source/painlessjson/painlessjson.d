@@ -518,30 +518,20 @@ unittest
     assertEqual(fromJSON!(int[])(toJSON([1, 2])), [1, 2]);
 }
 
-/// More complicated array example
+/// Array as member of other class
 unittest
 {
+    // Types need to be defined in different module, otherwise 
+    // type is not known at compile time
     import painlessjson.unittesttypes_local_import;
 
     string jsonString = q{[ {"duration": "10"} ]};
     Route[] routes = parseJSON(jsonString).fromJSON!(Route[]);
     assertEqual(routes.length, 1);
 
-    JourneyPlan jp;
-    jp.routes = parseJSON(jsonString).fromJSON!(Route[]);
-    assertEqual(jp.routes.length, 1);
-    jp.routes.length = 0; // Reset
-
     jsonString = q{{"routes":[ {"duration": "10"} ] }};
-    auto jsonAA = parseJSON(jsonString).object;
-    jp.routes = fromJSON!(Route[])(jsonAA["routes"]);
-    assertEqual(jp.routes.length, 1);
-    jp.routes.length = 0; // Reset length
-    /*
-       Above works, but below doesn't.. 
-    */
+    JourneyPlan jp;
     jp = parseJSON(jsonString).fromJSON!JourneyPlan;
-    assertEqual(jp.la, "bla");
     assertEqual(jp.routes.length, 1);
 }
 
