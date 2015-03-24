@@ -349,26 +349,9 @@ private T fromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == J
             {
                 return bestOverload(json);
             }
-            throw jsonExceptionCantSatisyConstructor(json);
+            throw new JSONException("JSONValue can't satisfy any constructor: " ~ json.toPrettyString);
         }
     }
-}
-
-private JSONException jsonExceptionCantSatisyConstructor(in JSONValue json)
-{
-    /+
-        toPrettyString does not work with an in/const variable on older D compilers.
-        So if toPrettyString can't be use we fall back to a less constructve error message.
-    +/
-    static if (__traits(compiles, json.toPrettyString()))
-    {
-        return new JSONException("JSONValue can't satisfy any constructor: " ~ json.toPrettyString);
-    }
-    else
-    {
-        return new JSONException("JSONValue can't satisfy any constructor.");
-    }
-
 }
 
 /// Convert from JSONValue to any other type
