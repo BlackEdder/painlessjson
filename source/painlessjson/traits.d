@@ -8,7 +8,7 @@ template hasAnnotation(alias f, Attr)
     {
         foreach (attr; __traits(getAttributes, f))
             static if (is(attr == Attr) || is(typeof(attr) == Attr))
-            return true;
+                return true;
         return false;
     }
 
@@ -21,7 +21,7 @@ template hasAnyOfTheseAnnotations(alias f, Attr...)
     {
         foreach (annotation; Attr)
             static if (hasAnnotation!(f, annotation))
-            return true;
+                return true;
         return false;
     }
 
@@ -34,7 +34,7 @@ template hasValueAnnotation(alias f, Attr)
     {
         foreach (attr; __traits(getAttributes, f))
             static if (is(typeof(attr) == Attr))
-            return true;
+                return true;
         return false;
     }
 
@@ -47,7 +47,7 @@ template hasAnyOfTheseValueAnnotations(alias f, Attr...)
     {
         foreach (annotation; Attr)
             static if (hasValueAnnotation(f, annotation))
-            return true;
+                return true;
         return false;
     }
 
@@ -60,7 +60,7 @@ template getAnnotation(alias f, Attr) if (hasValueAnnotation!(f, Attr))
     {
         foreach (attr; __traits(getAttributes, f))
             static if (is(typeof(attr) == Attr))
-            return attr;
+                return attr;
         assert(0);
     }
 
