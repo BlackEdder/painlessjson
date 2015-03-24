@@ -4,6 +4,7 @@ import std.conv;
 import std.json;
 import std.range;
 import std.traits;
+import std.typecons : TypeTuple;
 import painlessjson.traits;
 import painlessjson.annotations;
 
