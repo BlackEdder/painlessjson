@@ -7,4 +7,5 @@ matrix:
     - d: dmd-2.066.1
       env:
         - secure: "HYyeqymx/RXciztZZ837ZFuuUKvXf5bgzv32TaZEtZ2hXFpNuL4ie+pYwqAAcKWblilOQ3jEr4MjFwcjlMid8jXbXVhcPnY5sY4bSHLiKj3SCnThTgaSvmsO2P1CrGA+nbaJTFLvs4s91q6GStg3Gc6zry1y14Hu9T1brUf3cx8="
+    - d: dmd-2.067.0
     - d: ldc-0.15.1
