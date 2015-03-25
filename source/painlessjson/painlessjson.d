@@ -135,7 +135,8 @@ unittest
 unittest
 {
     auto p = PointSerializationName(-1, 2);
-    assertEqual(toJSON(p).toString, q{{"yOut":2,"xOut":-1}});
+    assertEqual(toJSON(p)["xOut"].floating, -1);
+    assertEqual(toJSON(p)["yOut"].floating, 2);
 }
 
 /// User class with SerializeIgnore annotations
