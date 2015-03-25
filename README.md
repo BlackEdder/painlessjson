@@ -67,4 +67,4 @@ More detailed examples can be found in the [master branch documentation on Githu
 The library uses compile time reflection to find the fields in your classes. This generates the same code as a handwritten implementation would. It uses std.json on the backend and performance is mainly determined by the std.json implementation. At the moment of writing (2014) std.json is known to be slow compared to other languages. Hopefully, this will be improved over time.
 
 ## Tested compilers
-![DMD-2.067.0](https://img.shields.io/badge/DMD-2.067.0-green.svg) ![dmd-2.066.1](https://img.shields.io/badge/DMD-2.066.1-brightgreen.svg) ![DMD-2.065.0](https://img.shields.io/badge/DMD-2.065.0-red.svg)  ![LDC-0.15.1](https://img.shields.io/badge/LDC-0.15.1-brightgreen.svg) ![GDC-4.9.0](https://img.shields.io/badge/GDC-4.9.0-red.svg)
+![DMD-2.067.0](https://img.shields.io/badge/DMD-2.067.0-brightgreen.svg) ![dmd-2.066.1](https://img.shields.io/badge/DMD-2.066.1-brightgreen.svg) ![DMD-2.065.0](https://img.shields.io/badge/DMD-2.065.0-red.svg)  ![LDC-0.15.1](https://img.shields.io/badge/LDC-0.15.1-brightgreen.svg) ![GDC-4.9.0](https://img.shields.io/badge/GDC-4.9.0-red.svg)
