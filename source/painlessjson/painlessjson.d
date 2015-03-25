@@ -233,7 +233,9 @@ unittest
     }
 
     auto z = new Z;
-    assertEqual(z.toJSON.toString, q{{"x":0,"y":1,"add":"bla"}});
+    assertEqual( z.toJSON["x"].floating, 0 );
+    assertEqual( z.toJSON["y"].floating, 1 );
+    assertEqual( z.toJSON["add"].str, "bla" );
 }
 
 private T fromJSONImpl(T)(in JSONValue json) if (is(T == JSONValue))
