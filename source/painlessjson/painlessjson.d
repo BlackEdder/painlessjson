@@ -4,6 +4,7 @@ import std.conv;
 import std.json;
 import std.range;
 import std.traits;
+import std.typecons : TypeTuple;
 import painlessjson.traits;
 import painlessjson.annotations;
 
@@ -134,7 +135,8 @@ unittest
 unittest
 {
     auto p = PointSerializationName(-1, 2);
-    assertEqual(toJSON(p).toString, q{{"yOut":2,"xOut":-1}});
+    assertEqual(toJSON(p)["xOut"].floating, -1);
+    assertEqual(toJSON(p)["yOut"].floating, 2);
 }
 
 /// User class with SerializeIgnore annotations
@@ -231,7 +233,9 @@ unittest
     }
 
     auto z = new Z;
-    assertEqual(z.toJSON.toString, q{{"x":0,"y":1,"add":"bla"}});
+    assertEqual( z.toJSON["x"].floating, 0 );
+    assertEqual( z.toJSON["y"].floating, 1 );
+    assertEqual( z.toJSON["add"].str, "bla" );
 }
 
 private T fromJSONImpl(T)(in JSONValue json) if (is(T == JSONValue))
