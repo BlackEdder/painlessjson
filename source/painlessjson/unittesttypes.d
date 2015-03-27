@@ -96,6 +96,28 @@ class PointPrivate
 
 }
 
+class PointDefaultFromJSON
+{
+    double _x;
+    private double _y;
+
+    static PointPrivate _fromJSON(JSONValue value)
+    {
+        auto pnt = defaultFromJSON!PointDefaultFromJSON( value );
+        pnt.y = fromJSON!double(value["y"]);
+        return pnt;
+    }
+
+    const JSONValue _toJSON()
+    {
+        JSONValue[string] json;
+        json = this.defaultToJSON.object;
+        json["y"] = JSONValue(y);
+        return JSONValue(json);
+    }
+}
+
+
 struct PointPrivateProperty
 {
     private double _x;
