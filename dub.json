@@ -5,7 +5,8 @@
 	"copyright": "Copyright © 2014, Edwin van Leeuwen",
 	"authors": ["Edwin van Leeuwen","Pierre Krafft"],
 	"license": "BSD 3-clause",
-	"dependencies": {
+    "dependencies": {
+        "dunit": "~>1.0.10"
     },
     "configurations": [
         {
