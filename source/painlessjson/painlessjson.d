@@ -46,8 +46,10 @@ JSONValue defaultToJSON(T)(in T object) if (isAssociativeArray!T)
     return JSONValue(jsonAA);
 }
 
-/// Convert any type to JSON
-/// Can be overridden by _toJSON
+/++
+ Convert any type to JSON<br />
+ Can be overridden by &#95;toJSON
+ +/
 JSONValue defaultToJSON(T)(in T object) if (!isBuiltinType!T
         && !__traits(compiles, (in T t) { JSONValue(t); }))
 {
@@ -300,8 +302,10 @@ T defaultFromJSON(T)(in JSONValue json) if (isAssociativeArray!T)
     return t;
 }
 
-/// Convert to given type from JSON
-/// Can be overridden by _fromJSON
+/++
+ Convert to given type from JSON.<br />
+ Can be overridden by &#95;fromJSON.
+ +/
 T defaultFromJSON(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
 {
     static if (hasAccessibleDefaultsConstructor!(T))
@@ -369,17 +373,6 @@ T defaultFromJSON(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONVa
                 "JSONValue can't satisfy any constructor: " ~ json.toPrettyString);
         }
     }
-}
-
-/// Convert from JSONValue to any other type
-T fromJSON(T)(in JSONValue json)
-{
-    static if (__traits(compiles, { return T._fromJSON(json); }))
-    {
-        return T._fromJSON(json);
-    }
-    else
-        return defaultFromJSON!T(json);
 }
 
 template hasAccessibleDefaultsConstructor(T)
@@ -503,6 +496,17 @@ template hasAccessibleConstructor(T)
     }
 
     enum bool hasAccessibleConstructor = helper();
+}
+
+/// Convert from JSONValue to any other type
+T fromJSON(T)(in JSONValue json)
+{
+    static if (__traits(compiles, { return T._fromJSON(json); }))
+    {
+        return T._fromJSON(json);
+    }
+    else
+        return defaultFromJSON!T(json);
 }
 
 /// Converting common types
