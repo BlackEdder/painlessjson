@@ -101,7 +101,9 @@ class PointDefaultFromJSON
     double _x;
     private double _y;
 
-    this() {}
+    this()
+    {
+    }
 
     this(double x_, double y_)
     {
@@ -119,10 +121,9 @@ class PointDefaultFromJSON
         return _y;
     }
 
-
     static PointDefaultFromJSON _fromJSON(JSONValue value)
     {
-        auto pnt = defaultFromJSON!PointDefaultFromJSON( value );
+        auto pnt = defaultFromJSON!PointDefaultFromJSON(value);
         pnt._y = fromJSON!double(value["y"]);
         return pnt;
     }
@@ -135,7 +136,6 @@ class PointDefaultFromJSON
         return JSONValue(json);
     }
 }
-
 
 struct PointPrivateProperty
 {

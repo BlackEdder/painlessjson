@@ -27,8 +27,9 @@ JSONValue defaultToJSON(T)(in T object) if (__traits(compiles, (in T t) {
 }
 
 //See if we can use something else than !__traits(compiles, (T t){JSONValue(t);})
-JSONValue defaultToJSON(T)(in T object) if (isArray!T
-        && !__traits(compiles, (in T t) { JSONValue(t); }))
+JSONValue defaultToJSON(T)(in T object) if (isArray!T && !__traits(compiles, (in T t) {
+    JSONValue(t);
+}))
 {
     JSONValue[] jsonRange;
     jsonRange = map!((el) => el.toJSON)(object).array;
@@ -55,15 +56,15 @@ JSONValue defaultToJSON(T)(in T object) if (!isBuiltinType!T
     foreach (name; __traits(allMembers, T))
     {
         static if (__traits(compiles,
-                    {
-                    json[serializationToName!(__traits(getMember, object, name),
-                            name)] = __traits(getMember, object, name).toJSON;
-                    }) && !hasAnyOfTheseAnnotations!(__traits(getMember,
-                            object, name), SerializeIgnore, SerializeToIgnore)
-                && isFieldOrProperty!(__traits(getMember, object, name)))
+                {
+                    json[serializationToName!(__traits(getMember, object, name), name)] = __traits(getMember,
+                        object, name).toJSON;
+                }) && !hasAnyOfTheseAnnotations!(__traits(getMember, object,
+            name), SerializeIgnore, SerializeToIgnore)
+            && isFieldOrProperty!(__traits(getMember, object, name)))
         {
             json[serializationToName!(__traits(getMember, object, name), name)] = __traits(getMember,
-                    object, name).toJSON;
+                object, name).toJSON;
         }
     }
     return JSONValue(json);
@@ -123,8 +124,8 @@ unittest
     PointPrivate p = new PointPrivate(-1, 2);
     assertEqual(toJSON(p).toString, q{{"x":-1,"y":2}});
     auto pnt = p.toJSON.fromJSON!PointPrivate;
-    assertEqual( p.x, -1 );
-    assertEqual( p.y, 2 );
+    assertEqual(p.x, -1);
+    assertEqual(p.y, 2);
 }
 
 /// User class with defaultToJSON
@@ -133,8 +134,8 @@ unittest
     PointDefaultFromJSON p = new PointDefaultFromJSON(-1, 2);
     assertEqual(toJSON(p).toString, q{{"_x":-1,"y":2}});
     auto pnt = p.toJSON.fromJSON!PointDefaultFromJSON;
-    assertEqual( p.x, -1 );
-    assertEqual( p.y, 2 );
+    assertEqual(p.x, -1);
+    assertEqual(p.y, 2);
 }
 
 /// User class with private fields and @property
@@ -246,9 +247,9 @@ unittest
     }
 
     auto z = new Z;
-    assertEqual( z.toJSON["x"].floating, 0 );
-    assertEqual( z.toJSON["y"].floating, 1 );
-    assertEqual( z.toJSON["add"].str, "bla" );
+    assertEqual(z.toJSON["x"].floating, 0);
+    assertEqual(z.toJSON["y"].floating, 1);
+    assertEqual(z.toJSON["add"].str, "bla");
 }
 
 T defaultFromJSON(T)(in JSONValue json) if (is(T == JSONValue))
@@ -364,7 +365,8 @@ T defaultFromJSON(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONVa
             {
                 return bestOverload(json);
             }
-            throw new JSONException("JSONValue can't satisfy any constructor: " ~ json.toPrettyString);
+            throw new JSONException(
+                "JSONValue can't satisfy any constructor: " ~ json.toPrettyString);
         }
     }
 }
