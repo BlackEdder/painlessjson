@@ -19,7 +19,7 @@ version (unittest)
 }
 
 //See if we can use something else than __traits(compiles, (T t){JSONValue(t);})
-private JSONValue toJSONImpl(T)(in T object) if (__traits(compiles, (in T t) {
+private JSONValue defaultToJSONImpl(T)(in T object) if (__traits(compiles, (in T t) {
     JSONValue(t);
 }))
 {
@@ -27,15 +27,16 @@ private JSONValue toJSONImpl(T)(in T object) if (__traits(compiles, (in T t) {
 }
 
 //See if we can use something else than !__traits(compiles, (T t){JSONValue(t);})
-private JSONValue toJSONImpl(T)(in T object) if (isArray!T
-        && !__traits(compiles, (in T t) { JSONValue(t); }))
+private JSONValue defaultToJSONImpl(T)(in T object) if (isArray!T && !__traits(compiles, (in T t) {
+    JSONValue(t);
+}))
 {
     JSONValue[] jsonRange;
     jsonRange = map!((el) => el.toJSON)(object).array;
     return JSONValue(jsonRange);
 }
 
-private JSONValue toJSONImpl(T)(in T object) if (isAssociativeArray!T)
+private JSONValue defaultToJSONImpl(T)(in T object) if (isAssociativeArray!T)
 {
     JSONValue[string] jsonAA;
     foreach (key, value; object)
@@ -45,39 +46,45 @@ private JSONValue toJSONImpl(T)(in T object) if (isAssociativeArray!T)
     return JSONValue(jsonAA);
 }
 
-private JSONValue toJSONImpl(T)(in T object) if (!isBuiltinType!T
+private JSONValue defaultToJSONImpl(T)(in T object) if (!isBuiltinType!T
         && !__traits(compiles, (in T t) { JSONValue(t); }))
 {
-    static if (__traits(compiles, (in T t) { return object._toJSON(); }))
+    JSONValue[string] json;
+    // Getting all member variables (there is probably an easier way)
+    foreach (name; __traits(allMembers, T))
     {
-        return object._toJSON();
-    }
-    else
-    {
-        JSONValue[string] json;
-        // Getting all member variables (there is probably an easier way)
-        foreach (name; __traits(allMembers, T))
+        static if (__traits(compiles,
+                {
+                    json[serializationToName!(__traits(getMember, object, name), name)] = __traits(getMember,
+                        object, name).toJSON;
+                }) && !hasAnyOfTheseAnnotations!(__traits(getMember, object,
+            name), SerializeIgnore, SerializeToIgnore)
+            && isFieldOrProperty!(__traits(getMember, object, name)))
         {
-            static if (__traits(compiles,
-                    {
-                        json[serializationToName!(__traits(getMember, object, name),
-                            name)] = __traits(getMember, object, name).toJSON;
-                    }) && !hasAnyOfTheseAnnotations!(__traits(getMember,
-                object, name), SerializeIgnore, SerializeToIgnore)
-                && isFieldOrProperty!(__traits(getMember, object, name)))
-            {
-                json[serializationToName!(__traits(getMember, object, name), name)] = __traits(getMember,
-                    object, name).toJSON;
-            }
+            json[serializationToName!(__traits(getMember, object, name), name)] = __traits(getMember,
+                object, name).toJSON;
         }
-        return JSONValue(json);
     }
+    return JSONValue(json);
+}
+
+/++
+ Convert any type to JSON<br />
+ Can be overridden by &#95;toJSON
+ +/
+JSONValue defaultToJSON(T)(in T t){
+    return defaultToJSONImpl(t);
 }
 
 /// Template function that converts any object to JSON
 JSONValue toJSON(T)(in T t)
 {
-    return toJSONImpl!T(t);
+    static if (__traits(compiles, (in T t) { return t._toJSON(); }))
+    {
+        return t._toJSON();
+    }
+    else
+        return defaultToJSON!T(t);
 }
 
 /// Converting common types
@@ -122,6 +129,19 @@ unittest
 {
     PointPrivate p = new PointPrivate(-1, 2);
     assertEqual(toJSON(p).toString, q{{"x":-1,"y":2}});
+    auto pnt = p.toJSON.fromJSON!PointPrivate;
+    assertEqual(p.x, -1);
+    assertEqual(p.y, 2);
+}
+
+/// User class with defaultToJSON
+unittest
+{
+    PointDefaultFromJSON p = new PointDefaultFromJSON(-1, 2);
+    assertEqual(toJSON(p).toString, q{{"_x":-1,"y":2}});
+    auto pnt = p.toJSON.fromJSON!PointDefaultFromJSON;
+    assertEqual(p.x, -1);
+    assertEqual(p.y, 2);
 }
 
 /// User class with private fields and @property
@@ -233,22 +253,22 @@ unittest
     }
 
     auto z = new Z;
-    assertEqual( z.toJSON["x"].floating, 0 );
-    assertEqual( z.toJSON["y"].floating, 1 );
-    assertEqual( z.toJSON["add"].str, "bla" );
+    assertEqual(z.toJSON["x"].floating, 0);
+    assertEqual(z.toJSON["y"].floating, 1);
+    assertEqual(z.toJSON["add"].str, "bla");
 }
 
-private T fromJSONImpl(T)(in JSONValue json) if (is(T == JSONValue))
+private T defaultFromJSONImpl(T)(in JSONValue json) if (is(T == JSONValue))
 {
     return json;
 }
 
-private T fromJSONImpl(T)(in JSONValue json) if (isIntegral!T)
+private T defaultFromJSONImpl(T)(in JSONValue json) if (isIntegral!T)
 {
     return to!T(json.integer);
 }
 
-private T fromJSONImpl(T)(in JSONValue json) if (isFloatingPoint!T)
+private T defaultFromJSONImpl(T)(in JSONValue json) if (isFloatingPoint!T)
 {
     if (json.type == JSON_TYPE.INTEGER)
         return to!T(json.integer);
@@ -256,12 +276,12 @@ private T fromJSONImpl(T)(in JSONValue json) if (isFloatingPoint!T)
         return to!T(json.floating);
 }
 
-private T fromJSONImpl(T)(in JSONValue json) if (is(T == string))
+private T defaultFromJSONImpl(T)(in JSONValue json) if (is(T == string))
 {
     return to!T(json.str);
 }
 
-private T fromJSONImpl(T)(in JSONValue json) if (isBoolean!T)
+private T defaultFromJSONImpl(T)(in JSONValue json) if (isBoolean!T)
 {
     if (json.type == JSON_TYPE.TRUE)
         return true;
@@ -269,13 +289,13 @@ private T fromJSONImpl(T)(in JSONValue json) if (isBoolean!T)
         return false;
 }
 
-private T fromJSONImpl(T)(in JSONValue json) if (isArray!T &&  !is(T == string))
+private T defaultFromJSONImpl(T)(in JSONValue json) if (isArray!T &&  !is(T == string))
 {
     T t; //Se is we can find another way of finding t.front
     return map!((js) => fromJSON!(typeof(t.front))(js))(json.array).array;
 }
 
-private T fromJSONImpl(T)(in JSONValue json) if (isAssociativeArray!T)
+private T defaultFromJSONImpl(T)(in JSONValue json) if (isAssociativeArray!T)
 {
     T t;
     const JSONValue[string] jsonAA = json.object;
@@ -286,13 +306,13 @@ private T fromJSONImpl(T)(in JSONValue json) if (isAssociativeArray!T)
     return t;
 }
 
-private T fromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
+/++
+ Convert to given type from JSON.<br />
+ Can be overridden by &#95;fromJSON.
+ +/
+private T defaultFromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
 {
-    static if (__traits(compiles, { return T._fromJSON(json); }))
-    {
-        return T._fromJSON(json);
-    }
-    else static if (hasAccessibleDefaultsConstructor!(T))
+    static if (hasAccessibleDefaultsConstructor!(T))
     {
         T t = getIntstanceFromDefaultConstructor!T;
         mixin("const  JSONValue[string] jsonAA = json.object;");
@@ -353,15 +373,18 @@ private T fromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == J
             {
                 return bestOverload(json);
             }
-            throw new JSONException("JSONValue can't satisfy any constructor: " ~ json.toPrettyString);
+            throw new JSONException(
+                "JSONValue can't satisfy any constructor: " ~ json.toPrettyString);
         }
     }
 }
 
-/// Convert from JSONValue to any other type
-T fromJSON(T)(in JSONValue json)
-{
-    return fromJSONImpl!T(json);
+/++
+ Convert to given type from JSON.<br />
+ Can be overridden by &#95;fromJSON.
+ +/
+T defaultFromJSON(T)(in JSONValue json){
+    return defaultFromJSONImpl!T(json);
 }
 
 template hasAccessibleDefaultsConstructor(T)
@@ -485,6 +508,17 @@ template hasAccessibleConstructor(T)
     }
 
     enum bool hasAccessibleConstructor = helper();
+}
+
+/// Convert from JSONValue to any other type
+T fromJSON(T)(in JSONValue json)
+{
+    static if (__traits(compiles, { return T._fromJSON(json); }))
+    {
+        return T._fromJSON(json);
+    }
+    else
+        return defaultFromJSON!T(json);
 }
 
 /// Converting common types
