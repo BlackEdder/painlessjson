@@ -48,36 +48,34 @@ JSONValue defaultToJSON(T)(in T object) if (isAssociativeArray!T)
 JSONValue defaultToJSON(T)(in T object) if (!isBuiltinType!T
         && !__traits(compiles, (in T t) { JSONValue(t); }))
 {
-    static if (__traits(compiles, (in T t) { return object._toJSON(); }))
+    JSONValue[string] json;
+    // Getting all member variables (there is probably an easier way)
+    foreach (name; __traits(allMembers, T))
     {
-        return object._toJSON();
-    }
-    else
-    {
-        JSONValue[string] json;
-        // Getting all member variables (there is probably an easier way)
-        foreach (name; __traits(allMembers, T))
-        {
-            static if (__traits(compiles,
+        static if (__traits(compiles,
                     {
-                        json[serializationToName!(__traits(getMember, object, name),
+                    json[serializationToName!(__traits(getMember, object, name),
                             name)] = __traits(getMember, object, name).toJSON;
                     }) && !hasAnyOfTheseAnnotations!(__traits(getMember,
-                object, name), SerializeIgnore, SerializeToIgnore)
+                            object, name), SerializeIgnore, SerializeToIgnore)
                 && isFieldOrProperty!(__traits(getMember, object, name)))
-            {
-                json[serializationToName!(__traits(getMember, object, name), name)] = __traits(getMember,
+        {
+            json[serializationToName!(__traits(getMember, object, name), name)] = __traits(getMember,
                     object, name).toJSON;
-            }
         }
-        return JSONValue(json);
     }
+    return JSONValue(json);
 }
 
 /// Template function that converts any object to JSON
 JSONValue toJSON(T)(in T t)
 {
-    return defaultToJSON!T(t);
+    static if (__traits(compiles, (in T t) { return t._toJSON(); }))
+    {
+        return t._toJSON();
+    }
+    else
+        return defaultToJSON!T(t);
 }
 
 /// Converting common types
@@ -122,6 +120,19 @@ unittest
 {
     PointPrivate p = new PointPrivate(-1, 2);
     assertEqual(toJSON(p).toString, q{{"x":-1,"y":2}});
+    auto pnt = p.toJSON.fromJSON!PointPrivate;
+    assertEqual( p.x, -1 );
+    assertEqual( p.y, 2 );
+}
+
+/// User class with defaultToJSON
+unittest
+{
+    PointDefaultFromJSON p = new PointDefaultFromJSON(-1, 2);
+    assertEqual(toJSON(p).toString, q{{"_x":-1,"y":2}});
+    auto pnt = p.toJSON.fromJSON!PointDefaultFromJSON;
+    assertEqual( p.x, -1 );
+    assertEqual( p.y, 2 );
 }
 
 /// User class with private fields and @property
@@ -288,11 +299,7 @@ T defaultFromJSON(T)(in JSONValue json) if (isAssociativeArray!T)
 
 T defaultFromJSON(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
 {
-    static if (__traits(compiles, { return T._fromJSON(json); }))
-    {
-        return T._fromJSON(json);
-    }
-    else static if (hasAccessibleDefaultsConstructor!(T))
+    static if (hasAccessibleDefaultsConstructor!(T))
     {
         T t = getIntstanceFromDefaultConstructor!T;
         mixin("const  JSONValue[string] jsonAA = json.object;");
@@ -361,7 +368,12 @@ T defaultFromJSON(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONVa
 /// Convert from JSONValue to any other type
 T fromJSON(T)(in JSONValue json)
 {
-    return defaultFromJSON!T(json);
+    static if (__traits(compiles, { return T._fromJSON(json); }))
+    {
+        return T._fromJSON(json);
+    }
+    else
+        return defaultFromJSON!T(json);
 }
 
 template hasAccessibleDefaultsConstructor(T)

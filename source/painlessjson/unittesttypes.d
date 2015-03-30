@@ -101,10 +101,29 @@ class PointDefaultFromJSON
     double _x;
     private double _y;
 
-    static PointPrivate _fromJSON(JSONValue value)
+    this() {}
+
+    this(double x_, double y_)
+    {
+        _x = x_;
+        _y = y_;
+    }
+
+    const double x()
+    {
+        return _x;
+    }
+
+    const double y()
+    {
+        return _y;
+    }
+
+
+    static PointDefaultFromJSON _fromJSON(JSONValue value)
     {
         auto pnt = defaultFromJSON!PointDefaultFromJSON( value );
-        pnt.y = fromJSON!double(value["y"]);
+        pnt._y = fromJSON!double(value["y"]);
         return pnt;
     }
 
@@ -112,7 +131,7 @@ class PointDefaultFromJSON
     {
         JSONValue[string] json;
         json = this.defaultToJSON.object;
-        json["y"] = JSONValue(y);
+        json["y"] = JSONValue(_y);
         return JSONValue(json);
     }
 }
