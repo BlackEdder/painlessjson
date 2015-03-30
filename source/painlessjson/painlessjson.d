@@ -19,7 +19,7 @@ version (unittest)
 }
 
 //See if we can use something else than __traits(compiles, (T t){JSONValue(t);})
-JSONValue defaultToJSONImpl(T)(in T object) if (__traits(compiles, (in T t) {
+private JSONValue defaultToJSONImpl(T)(in T object) if (__traits(compiles, (in T t) {
     JSONValue(t);
 }))
 {
@@ -27,7 +27,7 @@ JSONValue defaultToJSONImpl(T)(in T object) if (__traits(compiles, (in T t) {
 }
 
 //See if we can use something else than !__traits(compiles, (T t){JSONValue(t);})
-JSONValue defaultToJSONImpl(T)(in T object) if (isArray!T && !__traits(compiles, (in T t) {
+private JSONValue defaultToJSONImpl(T)(in T object) if (isArray!T && !__traits(compiles, (in T t) {
     JSONValue(t);
 }))
 {
@@ -36,7 +36,7 @@ JSONValue defaultToJSONImpl(T)(in T object) if (isArray!T && !__traits(compiles,
     return JSONValue(jsonRange);
 }
 
-JSONValue defaultToJSONImpl(T)(in T object) if (isAssociativeArray!T)
+private JSONValue defaultToJSONImpl(T)(in T object) if (isAssociativeArray!T)
 {
     JSONValue[string] jsonAA;
     foreach (key, value; object)
@@ -46,7 +46,7 @@ JSONValue defaultToJSONImpl(T)(in T object) if (isAssociativeArray!T)
     return JSONValue(jsonAA);
 }
 
-JSONValue defaultToJSONImpl(T)(in T object) if (!isBuiltinType!T
+private JSONValue defaultToJSONImpl(T)(in T object) if (!isBuiltinType!T
         && !__traits(compiles, (in T t) { JSONValue(t); }))
 {
     JSONValue[string] json;
@@ -258,17 +258,17 @@ unittest
     assertEqual(z.toJSON["add"].str, "bla");
 }
 
-T defaultFromJSONImpl(T)(in JSONValue json) if (is(T == JSONValue))
+private T defaultFromJSONImpl(T)(in JSONValue json) if (is(T == JSONValue))
 {
     return json;
 }
 
-T defaultFromJSONImpl(T)(in JSONValue json) if (isIntegral!T)
+private T defaultFromJSONImpl(T)(in JSONValue json) if (isIntegral!T)
 {
     return to!T(json.integer);
 }
 
-T defaultFromJSONImpl(T)(in JSONValue json) if (isFloatingPoint!T)
+private T defaultFromJSONImpl(T)(in JSONValue json) if (isFloatingPoint!T)
 {
     if (json.type == JSON_TYPE.INTEGER)
         return to!T(json.integer);
@@ -276,12 +276,12 @@ T defaultFromJSONImpl(T)(in JSONValue json) if (isFloatingPoint!T)
         return to!T(json.floating);
 }
 
-T defaultFromJSONImpl(T)(in JSONValue json) if (is(T == string))
+private T defaultFromJSONImpl(T)(in JSONValue json) if (is(T == string))
 {
     return to!T(json.str);
 }
 
-T defaultFromJSONImpl(T)(in JSONValue json) if (isBoolean!T)
+private T defaultFromJSONImpl(T)(in JSONValue json) if (isBoolean!T)
 {
     if (json.type == JSON_TYPE.TRUE)
         return true;
@@ -289,13 +289,13 @@ T defaultFromJSONImpl(T)(in JSONValue json) if (isBoolean!T)
         return false;
 }
 
-T defaultFromJSONImpl(T)(in JSONValue json) if (isArray!T &&  !is(T == string))
+private T defaultFromJSONImpl(T)(in JSONValue json) if (isArray!T &&  !is(T == string))
 {
     T t; //Se is we can find another way of finding t.front
     return map!((js) => fromJSON!(typeof(t.front))(js))(json.array).array;
 }
 
-T defaultFromJSONImpl(T)(in JSONValue json) if (isAssociativeArray!T)
+private T defaultFromJSONImpl(T)(in JSONValue json) if (isAssociativeArray!T)
 {
     T t;
     const JSONValue[string] jsonAA = json.object;
@@ -310,7 +310,7 @@ T defaultFromJSONImpl(T)(in JSONValue json) if (isAssociativeArray!T)
  Convert to given type from JSON.<br />
  Can be overridden by &#95;fromJSON.
  +/
-T defaultFromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
+private T defaultFromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
 {
     static if (hasAccessibleDefaultsConstructor!(T))
     {
