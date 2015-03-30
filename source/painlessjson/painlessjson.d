@@ -45,6 +45,8 @@ JSONValue defaultToJSON(T)(in T object) if (isAssociativeArray!T)
     return JSONValue(jsonAA);
 }
 
+/// Convert any type to JSON
+/// Can be overridden by _toJSON
 JSONValue defaultToJSON(T)(in T object) if (!isBuiltinType!T
         && !__traits(compiles, (in T t) { JSONValue(t); }))
 {
@@ -297,6 +299,8 @@ T defaultFromJSON(T)(in JSONValue json) if (isAssociativeArray!T)
     return t;
 }
 
+/// Convert to given type from JSON
+/// Can be overridden by _fromJSON
 T defaultFromJSON(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
 {
     static if (hasAccessibleDefaultsConstructor!(T))
