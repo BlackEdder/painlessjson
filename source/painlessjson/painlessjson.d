@@ -19,7 +19,7 @@ version (unittest)
 }
 
 //See if we can use something else than __traits(compiles, (T t){JSONValue(t);})
-JSONValue defaultToJSON(T)(in T object) if (__traits(compiles, (in T t) {
+JSONValue defaultToJSONImpl(T)(in T object) if (__traits(compiles, (in T t) {
     JSONValue(t);
 }))
 {
@@ -27,7 +27,7 @@ JSONValue defaultToJSON(T)(in T object) if (__traits(compiles, (in T t) {
 }
 
 //See if we can use something else than !__traits(compiles, (T t){JSONValue(t);})
-JSONValue defaultToJSON(T)(in T object) if (isArray!T && !__traits(compiles, (in T t) {
+JSONValue defaultToJSONImpl(T)(in T object) if (isArray!T && !__traits(compiles, (in T t) {
     JSONValue(t);
 }))
 {
@@ -36,7 +36,7 @@ JSONValue defaultToJSON(T)(in T object) if (isArray!T && !__traits(compiles, (in
     return JSONValue(jsonRange);
 }
 
-JSONValue defaultToJSON(T)(in T object) if (isAssociativeArray!T)
+JSONValue defaultToJSONImpl(T)(in T object) if (isAssociativeArray!T)
 {
     JSONValue[string] jsonAA;
     foreach (key, value; object)
@@ -46,11 +46,7 @@ JSONValue defaultToJSON(T)(in T object) if (isAssociativeArray!T)
     return JSONValue(jsonAA);
 }
 
-/++
- Convert any type to JSON<br />
- Can be overridden by &#95;toJSON
- +/
-JSONValue defaultToJSON(T)(in T object) if (!isBuiltinType!T
+JSONValue defaultToJSONImpl(T)(in T object) if (!isBuiltinType!T
         && !__traits(compiles, (in T t) { JSONValue(t); }))
 {
     JSONValue[string] json;
@@ -70,6 +66,14 @@ JSONValue defaultToJSON(T)(in T object) if (!isBuiltinType!T
         }
     }
     return JSONValue(json);
+}
+
+/++
+ Convert any type to JSON<br />
+ Can be overridden by &#95;toJSON
+ +/
+JSONValue defaultToJSON(T)(in T t){
+    return defaultToJSONImpl(t);
 }
 
 /// Template function that converts any object to JSON
@@ -254,17 +258,17 @@ unittest
     assertEqual(z.toJSON["add"].str, "bla");
 }
 
-T defaultFromJSON(T)(in JSONValue json) if (is(T == JSONValue))
+T defaultFromJSONImpl(T)(in JSONValue json) if (is(T == JSONValue))
 {
     return json;
 }
 
-T defaultFromJSON(T)(in JSONValue json) if (isIntegral!T)
+T defaultFromJSONImpl(T)(in JSONValue json) if (isIntegral!T)
 {
     return to!T(json.integer);
 }
 
-T defaultFromJSON(T)(in JSONValue json) if (isFloatingPoint!T)
+T defaultFromJSONImpl(T)(in JSONValue json) if (isFloatingPoint!T)
 {
     if (json.type == JSON_TYPE.INTEGER)
         return to!T(json.integer);
@@ -272,12 +276,12 @@ T defaultFromJSON(T)(in JSONValue json) if (isFloatingPoint!T)
         return to!T(json.floating);
 }
 
-T defaultFromJSON(T)(in JSONValue json) if (is(T == string))
+T defaultFromJSONImpl(T)(in JSONValue json) if (is(T == string))
 {
     return to!T(json.str);
 }
 
-T defaultFromJSON(T)(in JSONValue json) if (isBoolean!T)
+T defaultFromJSONImpl(T)(in JSONValue json) if (isBoolean!T)
 {
     if (json.type == JSON_TYPE.TRUE)
         return true;
@@ -285,13 +289,13 @@ T defaultFromJSON(T)(in JSONValue json) if (isBoolean!T)
         return false;
 }
 
-T defaultFromJSON(T)(in JSONValue json) if (isArray!T &&  !is(T == string))
+T defaultFromJSONImpl(T)(in JSONValue json) if (isArray!T &&  !is(T == string))
 {
     T t; //Se is we can find another way of finding t.front
     return map!((js) => fromJSON!(typeof(t.front))(js))(json.array).array;
 }
 
-T defaultFromJSON(T)(in JSONValue json) if (isAssociativeArray!T)
+T defaultFromJSONImpl(T)(in JSONValue json) if (isAssociativeArray!T)
 {
     T t;
     const JSONValue[string] jsonAA = json.object;
@@ -306,7 +310,7 @@ T defaultFromJSON(T)(in JSONValue json) if (isAssociativeArray!T)
  Convert to given type from JSON.<br />
  Can be overridden by &#95;fromJSON.
  +/
-T defaultFromJSON(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
+T defaultFromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
 {
     static if (hasAccessibleDefaultsConstructor!(T))
     {
@@ -373,6 +377,14 @@ T defaultFromJSON(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONVa
                 "JSONValue can't satisfy any constructor: " ~ json.toPrettyString);
         }
     }
+}
+
+/++
+ Convert to given type from JSON.<br />
+ Can be overridden by &#95;fromJSON.
+ +/
+T defaultFromJSON(T)(in JSONValue json){
+    return defaultFromJSONImpl!T(json);
 }
 
 template hasAccessibleDefaultsConstructor(T)
