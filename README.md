@@ -6,7 +6,7 @@ Painlessjson works by serializing a class/struct using compile time reflection a
 
 
 - `@SerializeToIgnore` & `@SerializeFromIgnore` disable serialization in the to step or the from step
-- `@SerializeIgnore` is the same as combining @SerializeToIgnore @SerializeToIgnore and disables serialization/deserialization for the variable
+- `@SerializeIgnore` is the same as combining `@SerializeToIgnore` and `@SerializeToIgnore`, and disables serialization/deserialization for the variable
 - `@SerializedName('Name')` Use specified name when serializing/deserializing
 - `@SerializedName('To', 'From')` Use a different name when serializing/deserializing
 - `@SerializedToName('To')` & `@SerializedFromName('From')` Alternative way of defining names.
