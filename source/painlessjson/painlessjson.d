@@ -318,6 +318,12 @@ private T defaultFromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is
         mixin("const  JSONValue[string] jsonAA = json.object;");
         foreach (name; __traits(allMembers, T))
         {
+
+            static if (__traits(compiles,{mixin("import " ~ moduleName!(__traits(getMember, t, name)) ~ ";");}))
+                {
+                    mixin("import " ~ moduleName!(__traits(getMember, t, name)) ~ ";");
+                }
+
             static if (__traits(compiles,
                     mixin(
                     "t." ~ name ~ "= fromJSON!(" ~ fullyQualifiedName!(typeof(__traits(getMember,
@@ -328,10 +334,6 @@ private T defaultFromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is
             {
                 enum string fromName = serializationFromName!(__traits(getMember, t,
                         name), name);
-                static if (!isBuiltinType!(typeof(__traits(getMember, t, name))))
-                {
-                    mixin("import " ~ moduleName!(typeof(__traits(getMember, t, name))) ~ ";");
-                }
                 mixin(
                     "if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name ~ "= fromJSON!(" ~ fullyQualifiedName!(
                     typeof(__traits(getMember, t, name))) ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
