@@ -537,6 +537,7 @@ unittest
 unittest
 {
     assertEqual(fromJSON!(int[])(toJSON([1, 2])), [1, 2]);
+    assertEqual(fromJSON!(Point[])(parseJSON(q{[{"x":-1,"y":2},{"x":3,"y":4}]})), [Point(-1,2),Point(3,4)]);
 }
 
 /// Array as member of other class
