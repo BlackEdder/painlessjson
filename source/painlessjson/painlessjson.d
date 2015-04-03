@@ -221,7 +221,11 @@ unittest
     CamelCaseConversion value;
     value.wasCamelCase = 5;
     value.was_underscore = 7;
-    assertEqual(value.toJSON!(CamelCaseConversion,SerializationOptions(false, true)).toString, q{{"was_camel_case":5,"was_underscore":7}}); 
+
+    auto valueAsJSON = value.toJSON!(CamelCaseConversion,SerializationOptions(false, true));
+    
+    assertEqual(valueAsJSON["was_camel_case"].integer, 5); 
+    assertEqual(valueAsJSON["was_underscore"].integer, 7);
 }
 
 /// Overloaded toJSON
