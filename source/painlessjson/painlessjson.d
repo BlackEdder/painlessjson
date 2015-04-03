@@ -1,5 +1,6 @@
 module painlessjson.painlessjson;
 
+import std.string;
 import std.conv;
 import std.json;
 import std.range;
@@ -7,6 +8,7 @@ import std.traits;
 import std.typecons : TypeTuple;
 import painlessjson.traits;
 import painlessjson.annotations;
+import painlessjson.string;
 
 version (unittest)
 {
@@ -18,8 +20,20 @@ version (unittest)
 
 }
 
+struct SerializationOptions
+{
+    bool alsoAcceptUnderscore;
+    bool convertToUnderscore;
+}
+
+enum defaultSerializatonOptions =  SerializationOptions(true, false);
+
+
+
+
+
 //See if we can use something else than __traits(compiles, (T t){JSONValue(t);})
-private JSONValue defaultToJSONImpl(T)(in T object) if (__traits(compiles, (in T t) {
+private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (__traits(compiles, (in T t) {
     JSONValue(t);
 }))
 {
@@ -27,7 +41,7 @@ private JSONValue defaultToJSONImpl(T)(in T object) if (__traits(compiles, (in T
 }
 
 //See if we can use something else than !__traits(compiles, (T t){JSONValue(t);})
-private JSONValue defaultToJSONImpl(T)(in T object) if (isArray!T && !__traits(compiles, (in T t) {
+private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (isArray!T && !__traits(compiles, (in T t) {
     JSONValue(t);
 }))
 {
@@ -36,7 +50,7 @@ private JSONValue defaultToJSONImpl(T)(in T object) if (isArray!T && !__traits(c
     return JSONValue(jsonRange);
 }
 
-private JSONValue defaultToJSONImpl(T)(in T object) if (isAssociativeArray!T)
+private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (isAssociativeArray!T)
 {
     JSONValue[string] jsonAA;
     foreach (key, value; object)
@@ -46,7 +60,7 @@ private JSONValue defaultToJSONImpl(T)(in T object) if (isAssociativeArray!T)
     return JSONValue(jsonAA);
 }
 
-private JSONValue defaultToJSONImpl(T)(in T object) if (!isBuiltinType!T
+private JSONValue defaultToJSONImpl(T, SerializationOptions options )(in T object) if (!isBuiltinType!T
         && !__traits(compiles, (in T t) { JSONValue(t); }))
 {
     JSONValue[string] json;
@@ -55,13 +69,13 @@ private JSONValue defaultToJSONImpl(T)(in T object) if (!isBuiltinType!T
     {
         static if (__traits(compiles,
                 {
-                    json[serializationToName!(__traits(getMember, object, name), name)] = __traits(getMember,
+                    json[serializationToName!(__traits(getMember, object, name), name, false)] = __traits(getMember,
                         object, name).toJSON;
                 }) && !hasAnyOfTheseAnnotations!(__traits(getMember, object,
             name), SerializeIgnore, SerializeToIgnore)
             && isFieldOrProperty!(__traits(getMember, object, name)))
         {
-            json[serializationToName!(__traits(getMember, object, name), name)] = __traits(getMember,
+            json[serializationToName!(__traits(getMember, object, name), name,(options.convertToUnderscore))] = __traits(getMember,
                 object, name).toJSON;
         }
     }
@@ -72,19 +86,19 @@ private JSONValue defaultToJSONImpl(T)(in T object) if (!isBuiltinType!T
  Convert any type to JSON<br />
  Can be overridden by &#95;toJSON
  +/
-JSONValue defaultToJSON(T)(in T t){
-    return defaultToJSONImpl(t);
+JSONValue defaultToJSON(T, SerializationOptions options = defaultSerializatonOptions)(in T t){
+    return defaultToJSONImpl!(T, options)(t);
 }
 
 /// Template function that converts any object to JSON
-JSONValue toJSON(T)(in T t)
+JSONValue toJSON(T, SerializationOptions options = defaultSerializatonOptions)(in T t)
 {
     static if (__traits(compiles, (in T t) { return t._toJSON(); }))
     {
         return t._toJSON();
     }
     else
-        return defaultToJSON!T(t);
+        return defaultToJSON!(T, options)(t);
 }
 
 /// Converting common types
@@ -201,6 +215,15 @@ unittest
     assertEqual(point, fromJSON!(Tuple!(int, "x", int, "y"))(parseJSON(q{{"x":5,"y":6}})));
 }
 
+/// Convert camel case to underscore automatically
+unittest
+{
+    CamelCaseConversion value;
+    value.wasCamelCase = 5;
+    value.was_underscore = 7;
+    assertEqual(value.toJSON!(CamelCaseConversion,SerializationOptions(false, true)).toString, q{{"was_camel_case":5,"was_underscore":7}}); 
+}
+
 /// Overloaded toJSON
 unittest
 {
@@ -258,17 +281,17 @@ unittest
     assertEqual(z.toJSON["add"].str, "bla");
 }
 
-private T defaultFromJSONImpl(T)(in JSONValue json) if (is(T == JSONValue))
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (is(T == JSONValue))
 {
     return json;
 }
 
-private T defaultFromJSONImpl(T)(in JSONValue json) if (isIntegral!T)
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isIntegral!T)
 {
     return to!T(json.integer);
 }
 
-private T defaultFromJSONImpl(T)(in JSONValue json) if (isFloatingPoint!T)
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isFloatingPoint!T)
 {
     if (json.type == JSON_TYPE.INTEGER)
         return to!T(json.integer);
@@ -276,12 +299,12 @@ private T defaultFromJSONImpl(T)(in JSONValue json) if (isFloatingPoint!T)
         return to!T(json.floating);
 }
 
-private T defaultFromJSONImpl(T)(in JSONValue json) if (is(T == string))
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (is(T == string))
 {
     return to!T(json.str);
 }
 
-private T defaultFromJSONImpl(T)(in JSONValue json) if (isBoolean!T)
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isBoolean!T)
 {
     if (json.type == JSON_TYPE.TRUE)
         return true;
@@ -289,13 +312,13 @@ private T defaultFromJSONImpl(T)(in JSONValue json) if (isBoolean!T)
         return false;
 }
 
-private T defaultFromJSONImpl(T)(in JSONValue json) if (isArray!T &&  !is(T == string))
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isArray!T &&  !is(T == string))
 {
     T t; //Se is we can find another way of finding t.front
     return map!((js) => fromJSON!(typeof(t.front))(js))(json.array).array;
 }
 
-private T defaultFromJSONImpl(T)(in JSONValue json) if (isAssociativeArray!T)
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isAssociativeArray!T)
 {
     T t;
     const JSONValue[string] jsonAA = json.object;
@@ -310,7 +333,7 @@ private T defaultFromJSONImpl(T)(in JSONValue json) if (isAssociativeArray!T)
  Convert to given type from JSON.<br />
  Can be overridden by &#95;fromJSON.
  +/
-private T defaultFromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
 {
     static if (hasAccessibleDefaultsConstructor!(T))
     {
@@ -337,6 +360,12 @@ private T defaultFromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is
                 mixin(
                     "if ( \"" ~ fromName ~ "\" in jsonAA) t." ~ name ~ "= fromJSON!(" ~ fullyQualifiedName!(
                     typeof(__traits(getMember, t, name))) ~ ")(jsonAA[\"" ~ fromName ~ "\"]);");
+                static if(options.alsoAcceptUnderscore)
+                {
+                    mixin(
+                    "if ( \"" ~ camelCaseToUnderscore(fromName) ~ "\" in jsonAA) t." ~ name ~ "= fromJSON!(" ~ fullyQualifiedName!(
+                    typeof(__traits(getMember, t, name))) ~ ")(jsonAA[\"" ~ camelCaseToUnderscore(fromName) ~ "\"]);");
+                }
             }
         }
         return t;
@@ -355,16 +384,16 @@ private T defaultFromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is
             {
                 static if (__traits(compiles,
                         {
-                            return getInstanceFromCustomConstructor!(T, overload)(json);
+                            return getInstanceFromCustomConstructor!(T, overload, false)(json);
                         }))
                 {
-                    if (jsonValueHasAllFieldsNeeded!(overload)(json))
+                    if (jsonValueHasAllFieldsNeeded!(overload, (options.alsoAcceptUnderscore))(json))
                     {
-                        ulong overloadScore = constructorOverloadScore!(overload)(json);
+                        ulong overloadScore = constructorOverloadScore!(overload, (options.alsoAcceptUnderscore))(json);
                         if (overloadScore < bestOverloadScore)
                         {
                             bestOverload = function(JSONValue value) {
-                                return getInstanceFromCustomConstructor!(T, overload)(value);
+                                return getInstanceFromCustomConstructor!(T, overload, (options.alsoAcceptUnderscore))(value);
                             };
                             bestOverloadScore = overloadScore;
                         }
@@ -385,8 +414,8 @@ private T defaultFromJSONImpl(T)(in JSONValue json) if (!isBuiltinType!T &&  !is
  Convert to given type from JSON.<br />
  Can be overridden by &#95;fromJSON.
  +/
-T defaultFromJSON(T)(in JSONValue json){
-    return defaultFromJSONImpl!T(json);
+T defaultFromJSON(T, SerializationOptions options = defaultSerializatonOptions)(in JSONValue json){
+    return defaultFromJSONImpl!(T, options)(json);
 }
 
 template hasAccessibleDefaultsConstructor(T)
@@ -412,7 +441,7 @@ T getIntstanceFromDefaultConstructor(T)()
     }
 }
 
-T getInstanceFromCustomConstructor(T, alias Ctor)(in JSONValue json)
+T getInstanceFromCustomConstructor(T, alias Ctor, bool alsoAcceptUnderscore)(in JSONValue json)
 {
     import std.typecons : staticIota;
 
@@ -426,6 +455,8 @@ T getInstanceFromCustomConstructor(T, alias Ctor)(in JSONValue json)
         if (paramName in json.object)
         {
             args[i] = fromJSON!(Types[i])(json[paramName]);
+        } else if( alsoAcceptUnderscore && camelCaseToUnderscore(paramName)){
+            args[i] = fromJSON!(Types[i])(json[camelCaseToUnderscore(paramName)]);
         }
         else
         {
@@ -451,7 +482,7 @@ T getInstanceFromCustomConstructor(T, alias Ctor)(in JSONValue json)
     }
 }
 
-bool jsonValueHasAllFieldsNeeded(alias Ctor)(in JSONValue json)
+bool jsonValueHasAllFieldsNeeded(alias Ctor, bool alsoAcceptUnderscore)(in JSONValue json)
 {
     import std.typecons : staticIota;
 
@@ -462,7 +493,7 @@ bool jsonValueHasAllFieldsNeeded(alias Ctor)(in JSONValue json)
     foreach (i; staticIota!(0, params.length))
     {
         enum paramName = params[i];
-        if (!(paramName in json.object) && is(defaults[i] == void))
+        if (!((paramName in json.object) || ( alsoAcceptUnderscore && (camelCaseToUnderscore(paramName) in json.object))) && is(defaults[i] == void))
         {
             return false;
         }
@@ -470,7 +501,7 @@ bool jsonValueHasAllFieldsNeeded(alias Ctor)(in JSONValue json)
     return true;
 }
 
-ulong constructorOverloadScore(alias Ctor)(in JSONValue json)
+ulong constructorOverloadScore(alias Ctor, bool alsoAcceptUnderscore)(in JSONValue json)
 {
     import std.typecons : staticIota;
 
@@ -482,7 +513,7 @@ ulong constructorOverloadScore(alias Ctor)(in JSONValue json)
     foreach (i; staticIota!(0, params.length))
     {
         enum paramName = params[i];
-        if (paramName in json.object)
+        if (paramName in json.object || ( alsoAcceptUnderscore && (camelCaseToUnderscore(paramName) in json.object)))
         {
             overloadScore--;
         }
@@ -500,7 +531,7 @@ template hasAccessibleConstructor(T)
             foreach (overload; Overloads)
             {
                 if (__traits(compiles, getInstanceFromCustomConstructor!(T,
-                        overload)(JSONValue())))
+                        overload, false)(JSONValue())))
                 {
                     return true;
                 }
@@ -513,14 +544,14 @@ template hasAccessibleConstructor(T)
 }
 
 /// Convert from JSONValue to any other type
-T fromJSON(T)(in JSONValue json)
+T fromJSON(T, SerializationOptions options = defaultSerializatonOptions)(in JSONValue json)
 {
     static if (__traits(compiles, { return T._fromJSON(json); }))
     {
         return T._fromJSON(json);
     }
     else
-        return defaultFromJSON!T(json);
+        return defaultFromJSON!(T,options)(json);
 }
 
 /// Converting common types
@@ -663,4 +694,12 @@ unittest
     auto person = fromJSON!IdAndName(parseJSON(q{{"id":34}}));
     assertEqual(person.id, 34);
     assertEqual(person.name, "Undefined");
+}
+
+/// Accept underscore and convert it to camelCase automatically
+unittest
+{
+    auto value = fromJSON!CamelCaseConversion(parseJSON(q{{"was_camel_case":8,"was_underscore":9}}));
+    assertEqual(value.wasCamelCase, 8);
+    assertEqual(value.was_underscore, 9);
 }
