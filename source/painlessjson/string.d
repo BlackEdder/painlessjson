@@ -20,6 +20,7 @@ unittest {
 
 string camelCaseToUnderscore(string input){
     auto stringBuilder = appender!string;
+    stringBuilder.reserve(input.length*2);
     bool previousWasLower = false;
     foreach(c;input){
         if(previousWasLower && to!char(c).isUpper())
