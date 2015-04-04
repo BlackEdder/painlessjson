@@ -23,12 +23,12 @@ string camelCaseToUnderscore(string input){
     stringBuilder.reserve(input.length*2);
     bool previousWasLower = false;
     foreach(c;input){
-        if(previousWasLower && to!char(c).isUpper())
+        if(previousWasLower && c.isUpper())
         {
             stringBuilder.put('_');
         }
 
-        if(to!char(c).isLower())
+        if(c.isLower())
         {
             previousWasLower = true;
         } else{
