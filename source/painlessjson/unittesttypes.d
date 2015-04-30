@@ -293,3 +293,9 @@ class IdAndName
         this.name = "Undefined";
     }
 }
+
+struct CamelCaseConversion
+{
+    int wasCamelCase;
+    int was_underscore;
+}

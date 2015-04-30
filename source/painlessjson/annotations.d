@@ -1,6 +1,7 @@
 module painlessjson.annotations;
 
 import painlessjson.traits;
+import painlessjson.string;
 
 struct SerializedToName
 {
@@ -41,7 +42,7 @@ struct SerializeFromIgnore
 {
 }
 
-template serializationToName(alias T, string defaultName)
+template serializationToName(alias T, string defaultName, bool alsoAcceptUnderscore)
 {
     static string helper()
     {
@@ -53,6 +54,9 @@ template serializationToName(alias T, string defaultName)
                 && getAnnotation!(T, SerializedToName).name)
         {
             return getAnnotation!(T, SerializedToName).name;
+        } else static if(alsoAcceptUnderscore)
+        {
+            return camelCaseToUnderscore(defaultName);
         }
         else
         {
