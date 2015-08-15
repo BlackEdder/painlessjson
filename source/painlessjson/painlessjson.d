@@ -1,21 +1,20 @@
 module painlessjson.painlessjson;
 
+import std.algorithm : map;
 import std.string;
 import std.conv;
 import std.json;
 import std.range;
 import std.traits;
-import std.typecons : TypeTuple;
+import std.typecons : TypeTuple, Tuple;
 import painlessjson.traits;
 import painlessjson.annotations;
 import painlessjson.string;
 
 version (unittest)
 {
-    import std.algorithm;
-    import std.stdio;
+    import std.stdio : writeln;
     import painlessjson.unittesttypes;
-    import std.typecons;
     import dunit.toolkit;
 
 }
