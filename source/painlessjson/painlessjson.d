@@ -196,6 +196,15 @@ unittest
     assertEqual(aaStruct.toJSON.toString, q{{"0":{"x":-1,"y":1},"1":{"x":2,"y":0}}});
 }
 
+/// Associative array containing struct
+unittest
+{
+    struct Inner {
+        string str;
+    }
+    assertEqual(["test": Inner("test2")].toJSON(), parseJSON(q{{"test": {"str": "test2"}}}));
+}
+
 /// Unnamed tuples
 unittest
 {
@@ -596,13 +605,22 @@ unittest
 /// Associative arrays
 unittest
 {
-    string[int] aa = [0 : "a", 1 : "b"];
-    auto aaCpy = fromJSON!(string[int])(toJSON(aa));
-    foreach (k, v; aa)
-    {
-        assertEqual(aaCpy[k], v);
-    }
+    string[int] aaInt = [0 : "a", 1 : "b"];
+    assertEqual(aaInt, fromJSON!(string[int])(parseJSON(q{{"0" : "a", "1": "b"}})));
+
+    string[string] aaString = ["hello" : "world", "json" : "painless"];
+    assertEqual(aaString, fromJSON!(string[string])(parseJSON(q{{"hello" : "world", "json" : "painless"}})));
 }
+
+/// Associative array containing struct
+/*unittest
+{
+    struct Inner {
+        string str;
+    }
+    auto parsed = fromJSON!(Inner[string])(parseJSON(q{{"key": {"str": "value"}}}));
+    assertEqual(parsed , ["key": Inner("value")]);
+}*/
 
 /// Structs from JSON
 unittest
