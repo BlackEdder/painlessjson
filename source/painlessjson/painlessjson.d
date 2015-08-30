@@ -49,11 +49,25 @@ private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object
     return JSONValue(jsonRange);
 }
 
-private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (isAssociativeArray!T)
+// AA for simple types
+private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (isAssociativeArray!T && isBuiltinType!(KeyType!T) && !isAssociativeArray!(KeyType!T))
 {
     JSONValue[string] jsonAA;
     foreach (key, value; object)
     {
+        
+        jsonAA[to!string(key)] = value.toJSON;
+    }
+    return JSONValue(jsonAA);
+}
+
+// AA for compound types
+private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (isAssociativeArray!T && (!isBuiltinType!(KeyType!T) || isAssociativeArray!(KeyType!T)))
+{
+    JSONValue[string] jsonAA;
+    foreach (key, value; object)
+    {
+
         jsonAA[key.toJSON.toString] = value.toJSON;
     }
     return JSONValue(jsonAA);
@@ -330,7 +344,20 @@ private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json
     return map!((js) => fromJSON!(typeof(t.front))(js))(json.array).array;
 }
 
-private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isAssociativeArray!T)
+// AA for simple keys
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isAssociativeArray!T && isBuiltinType!(KeyType!T) && !isAssociativeArray!(KeyType!T))
+{
+    T t;
+    const JSONValue[string] jsonAA = json.object;
+    foreach (k, v; jsonAA)
+    {
+        t[to!(KeyType!T)(k)] = fromJSON!(typeof(t.values.front))(v);
+    }
+    return t;
+}
+
+// AA for compound keys
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isAssociativeArray!T && (!isBuiltinType!(KeyType!T) || isAssociativeArray!(KeyType!T)))
 {
     T t;
     const JSONValue[string] jsonAA = json.object;
