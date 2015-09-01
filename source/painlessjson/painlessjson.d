@@ -16,7 +16,6 @@ version (unittest)
     import std.stdio : writeln;
     import painlessjson.unittesttypes;
     import dunit.toolkit;
-
 }
 
 struct SerializationOptions
@@ -49,11 +48,25 @@ private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object
     return JSONValue(jsonRange);
 }
 
-private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (isAssociativeArray!T)
+// AA for simple types
+private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (isAssociativeArray!T && isBuiltinType!(KeyType!T) && !isAssociativeArray!(KeyType!T))
 {
     JSONValue[string] jsonAA;
     foreach (key, value; object)
     {
+        
+        jsonAA[to!string(key)] = value.toJSON;
+    }
+    return JSONValue(jsonAA);
+}
+
+// AA for compound types
+private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (isAssociativeArray!T && (!isBuiltinType!(KeyType!T) || isAssociativeArray!(KeyType!T)))
+{
+    JSONValue[string] jsonAA;
+    foreach (key, value; object)
+    {
+
         jsonAA[key.toJSON.toString] = value.toJSON;
     }
     return JSONValue(jsonAA);
@@ -190,10 +203,27 @@ unittest
 unittest
 {
     string[int] aa = [0 : "a", 1 : "b"];
-    // In JSON (D) only string based associative arrays are supported, so:
     assert(aa.toJSON.toString == q{{"0":"a","1":"b"}});
     Point[int] aaStruct = [0 : Point(-1, 1), 1 : Point(2, 0)];
     assertEqual(aaStruct.toJSON.toString, q{{"0":{"x":-1,"y":1},"1":{"x":2,"y":0}}});
+}
+
+/// Associative array containing struct
+unittest
+{
+    struct Inner {
+        string str;
+    }
+    assertEqual(["test": Inner("test2")].toJSON().toString, q{{"test":{"str":"test2"}}});
+}
+
+/// Associative array with struct key
+unittest
+{
+    struct Inner {
+        string str;
+    }
+    assertEqual([Inner("key"): "value", Inner("key2"): "value2"].toJSON().toString, q{{"{\"str\":\"key\"}":"value","{\"str\":\"key2\"}":"value2"}});
 }
 
 /// Unnamed tuples
@@ -321,13 +351,36 @@ private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json
     return map!((js) => fromJSON!(typeof(t.front))(js))(json.array).array;
 }
 
-private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isAssociativeArray!T)
+// AA for simple keys
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isAssociativeArray!T && isBuiltinType!(KeyType!T) && !isAssociativeArray!(KeyType!T))
 {
     T t;
     const JSONValue[string] jsonAA = json.object;
     foreach (k, v; jsonAA)
     {
-        t[fromJSON!(typeof(t.keys.front))(parseJSON(k))] = fromJSON!(typeof(t.values.front))(v);
+        t[to!(KeyType!T)(k)] = fromJSON!(ValueType!T)(v);
+    }
+    return t;
+}
+
+// AA for compound keys
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isAssociativeArray!T && (!isBuiltinType!(KeyType!T) || isAssociativeArray!(KeyType!T)))
+{
+    KeyType!T keyConverter(string stringKey) {
+        try{
+            return fromJSON!(KeyType!T)(parseJSON(stringKey));
+        }
+        catch(JSONException) {
+            throw new Exception("Couldn't convert JSON key \"" ~ stringKey ~ "\" to " ~ KeyType!T.stringof ~ " which is the key type of " ~ T.stringof);
+        }
+    }
+
+    T t;
+    const JSONValue[string] jsonAA = json.object;
+    foreach (k, v; jsonAA)
+    {
+            t[keyConverter(k)] = fromJSON!(ValueType!T)(v);
+        
     }
     return t;
 }
@@ -419,6 +472,7 @@ private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json
  +/
 T defaultFromJSON(T, SerializationOptions options = defaultSerializatonOptions)(in JSONValue json){
     return defaultFromJSONImpl!(T, options)(json);
+    
 }
 
 template hasAccessibleDefaultsConstructor(T)
@@ -596,12 +650,51 @@ unittest
 /// Associative arrays
 unittest
 {
-    string[int] aa = [0 : "a", 1 : "b"];
-    auto aaCpy = fromJSON!(string[int])(toJSON(aa));
-    foreach (k, v; aa)
-    {
-        assertEqual(aaCpy[k], v);
+    string[int] aaInt = [0 : "a", 1 : "b"];
+    assertEqual(aaInt, fromJSON!(string[int])(parseJSON(q{{"0" : "a", "1": "b"}})));
+
+    string[string] aaString = ["hello" : "world", "json" : "painless"];
+    assertEqual(aaString, fromJSON!(string[string])(parseJSON(q{{"hello" : "world", "json" : "painless"}})));
+}
+
+/// Associative array containing struct
+unittest
+{
+    struct Inner {
+        string str;
     }
+    auto parsed = fromJSON!(Inner[string])(parseJSON(q{{"key": {"str": "value"}}}));
+    assertEqual(parsed , ["key": Inner("value")]);
+}
+
+/// Associative array with struct key
+unittest
+{
+    struct Inner {
+        string str;
+    }
+    JSONValue value = parseJSON(q{{"{\"str\":\"key\"}":"value", "{\"str\":\"key2\"}":"value2"}});
+    auto parsed = fromJSON!(string[Inner])(value);
+    assertEqual(
+        parsed
+        , [Inner("key"): "value", Inner("key2"): "value2"]);
+}
+
+/// Error reporting from inner objects
+unittest
+{
+    import std.exception : collectExceptionMsg;
+    import std.algorithm : canFind;
+    struct Inner {
+        string str;
+    }
+    void throwFunc() {
+        fromJSON!(string[Inner])(parseJSON(q{{"{\"str\": \"key1\"}": "value", "key2":"value2"}}));
+    }
+    auto errorMessage = collectExceptionMsg(throwFunc());
+    assert(errorMessage.canFind("key2"));
+    assert(errorMessage.canFind("string[Inner]"));
+    assert(!errorMessage.canFind("key1"));
 }
 
 /// Structs from JSON
