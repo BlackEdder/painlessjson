@@ -48,8 +48,10 @@ private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object
     return JSONValue(jsonRange);
 }
 
-// AA for simple types
-private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (isAssociativeArray!T && isBuiltinType!(KeyType!T) && !isAssociativeArray!(KeyType!T))
+// AA for simple types, excluding those handled by the JSONValue constructor
+private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object)
+    if (isAssociativeArray!T && isBuiltinType!(KeyType!T) && !isAssociativeArray!(KeyType!T) &&
+        !__traits(compiles, (in T t) { JSONValue(t);}))
 {
     JSONValue[string] jsonAA;
     foreach (key, value; object)
