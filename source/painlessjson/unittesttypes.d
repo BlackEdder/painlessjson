@@ -211,6 +211,18 @@ struct PointSerializationName
 
 }
 
+struct SimpleStruct {
+    string str;
+}
+
+struct StructWithStructAndAA {
+    struct Inner {
+        string str;
+    }
+    string[string] stringToString;
+    Inner[string] stringToInner;
+}
+
 ///
 struct PointSerializationIgnore
 {
