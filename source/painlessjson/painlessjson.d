@@ -227,7 +227,9 @@ unittest
 unittest
 {
     auto testStruct = StructWithStructAndAA(["key1": "value1"], ["key2": StructWithStructAndAA.Inner("value2")]);
-    assertEqual(testStruct.toJSON().toString, q{{"stringToInner":{"key2":{"str":"value2"}},"stringToString":{"key1":"value1"}}});
+    auto converted = testStruct.toJSON();
+    assertEqual(converted["stringToInner"].toString, q{{"key2":{"str":"value2"}}});
+    assertEqual(converted["stringToString"].toString, q{{"key1":"value1"}});
 }
 
 /// Unnamed tuples
@@ -678,6 +680,13 @@ unittest
         , [SimpleStruct("key"): "value", SimpleStruct("key2"): "value2"]);
 }
 
+/// struct with inner struct and AA
+unittest
+{
+    auto testStruct = StructWithStructAndAA(["key1": "value1"], ["key2": StructWithStructAndAA.Inner("value2")]);
+    auto testJSON = parseJSON(q{{"stringToInner":{"key2":{"str":"value2"}},"stringToString":{"key1":"value1"}}});
+    assertEqual(fromJSON!StructWithStructAndAA(testJSON), testStruct);
+}
 
 /// Error reporting from inner objects
 unittest
