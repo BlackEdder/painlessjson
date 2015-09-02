@@ -48,8 +48,10 @@ private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object
     return JSONValue(jsonRange);
 }
 
-// AA for simple types
-private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (isAssociativeArray!T && isBuiltinType!(KeyType!T) && !isAssociativeArray!(KeyType!T))
+// AA for simple types, excluding those handled by the JSONValue constructor
+private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object)
+    if (isAssociativeArray!T && isBuiltinType!(KeyType!T) && !isAssociativeArray!(KeyType!T) &&
+        !__traits(compiles, (in T t) { JSONValue(t);}))
 {
     JSONValue[string] jsonAA;
     foreach (key, value; object)
@@ -206,24 +208,28 @@ unittest
     assert(aa.toJSON.toString == q{{"0":"a","1":"b"}});
     Point[int] aaStruct = [0 : Point(-1, 1), 1 : Point(2, 0)];
     assertEqual(aaStruct.toJSON.toString, q{{"0":{"x":-1,"y":1},"1":{"x":2,"y":0}}});
+    assertEqual(["key": "value"].toJSON.toString, q{{"key":"value"}});
 }
 
 /// Associative array containing struct
 unittest
 {
-    struct Inner {
-        string str;
-    }
-    assertEqual(["test": Inner("test2")].toJSON().toString, q{{"test":{"str":"test2"}}});
+    assertEqual(["test": SimpleStruct("test2")].toJSON().toString, q{{"test":{"str":"test2"}}});
 }
 
 /// Associative array with struct key
 unittest
 {
-    struct Inner {
-        string str;
-    }
-    assertEqual([Inner("key"): "value", Inner("key2"): "value2"].toJSON().toString, q{{"{\"str\":\"key\"}":"value","{\"str\":\"key2\"}":"value2"}});
+    assertEqual([SimpleStruct("key"): "value", SimpleStruct("key2"): "value2"].toJSON().toString, q{{"{\"str\":\"key\"}":"value","{\"str\":\"key2\"}":"value2"}});
+}
+
+/// struct with inner struct and AA
+unittest
+{
+    auto testStruct = StructWithStructAndAA(["key1": "value1"], ["key2": StructWithStructAndAA.Inner("value2")]);
+    auto converted = testStruct.toJSON();
+    assertEqual(converted["stringToInner"].toString, q{{"key2":{"str":"value2"}}});
+    assertEqual(converted["stringToString"].toString, q{{"key1":"value1"}});
 }
 
 /// Unnamed tuples
@@ -660,24 +666,26 @@ unittest
 /// Associative array containing struct
 unittest
 {
-    struct Inner {
-        string str;
-    }
-    auto parsed = fromJSON!(Inner[string])(parseJSON(q{{"key": {"str": "value"}}}));
-    assertEqual(parsed , ["key": Inner("value")]);
+    auto parsed = fromJSON!(SimpleStruct[string])(parseJSON(q{{"key": {"str": "value"}}}));
+    assertEqual(parsed , ["key": SimpleStruct("value")]);
 }
 
 /// Associative array with struct key
 unittest
 {
-    struct Inner {
-        string str;
-    }
     JSONValue value = parseJSON(q{{"{\"str\":\"key\"}":"value", "{\"str\":\"key2\"}":"value2"}});
-    auto parsed = fromJSON!(string[Inner])(value);
+    auto parsed = fromJSON!(string[SimpleStruct])(value);
     assertEqual(
         parsed
-        , [Inner("key"): "value", Inner("key2"): "value2"]);
+        , [SimpleStruct("key"): "value", SimpleStruct("key2"): "value2"]);
+}
+
+/// struct with inner struct and AA
+unittest
+{
+    auto testStruct = StructWithStructAndAA(["key1": "value1"], ["key2": StructWithStructAndAA.Inner("value2")]);
+    auto testJSON = parseJSON(q{{"stringToInner":{"key2":{"str":"value2"}},"stringToString":{"key1":"value1"}}});
+    assertEqual(fromJSON!StructWithStructAndAA(testJSON), testStruct);
 }
 
 /// Error reporting from inner objects
@@ -685,15 +693,12 @@ unittest
 {
     import std.exception : collectExceptionMsg;
     import std.algorithm : canFind;
-    struct Inner {
-        string str;
-    }
     void throwFunc() {
-        fromJSON!(string[Inner])(parseJSON(q{{"{\"str\": \"key1\"}": "value", "key2":"value2"}}));
+        fromJSON!(string[SimpleStruct])(parseJSON(q{{"{\"str\": \"key1\"}": "value", "key2":"value2"}}));
     }
     auto errorMessage = collectExceptionMsg(throwFunc());
     assert(errorMessage.canFind("key2"));
-    assert(errorMessage.canFind("string[Inner]"));
+    assert(errorMessage.canFind("string[SimpleStruct]"));
     assert(!errorMessage.canFind("key1"));
 }
 
