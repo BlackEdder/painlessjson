@@ -7,9 +7,9 @@ import std.json;
 import std.range;
 import std.traits;
 import std.typecons : TypeTuple, Tuple;
-import painlessjson.traits;
 import painlessjson.annotations;
 import painlessjson.string;
+import painlesstraits;
 
 version (unittest)
 {

@@ -1,7 +1,7 @@
 module painlessjson.annotations;
 
-import painlessjson.traits;
 import painlessjson.string;
+import painlesstraits;
 
 struct SerializedToName
 {
