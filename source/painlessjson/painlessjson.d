@@ -592,15 +592,13 @@ template hasAccessibleConstructor(T)
         if (__traits(hasMember, T, "__ctor"))
         {
             alias Overloads = TypeTuple!(__traits(getOverloads, T, "__ctor"));
+            bool anyInstanciates = false;
             foreach (overload; Overloads)
             {
-                if (__traits(compiles, getInstanceFromCustomConstructor!(T,
-                        overload, false)(JSONValue())))
-                {
-                    return true;
-                }
+                anyInstanciates |= __traits(compiles, getInstanceFromCustomConstructor!(T,
+                        overload, false)(JSONValue()));
             }
-            return false;
+            return anyInstanciates;
         }
     }
 
