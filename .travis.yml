@@ -8,5 +8,6 @@ matrix:
     - secure: F1pwSI3BTHI/W0vaUNr2HeS7+25jLJiH2CF9pTW7cySKJGJkyOJ6gJkv71HYxq/cYVda8Y7qy+a//lZFQeWlEmMW4FTblXTE0qVvUzfCw3VRKLGYIMMMi2JzyWJODH+8Q2m19mS9OneZR5zL2NmopJn6wGrfUWZZuerk3XP57C0=
   - d: dmd-2.067.1
   - d: dmd-2.068.0
+  - d: dmd
   - d: ldc-0.15.1
   - d: gdc-4.9.2
