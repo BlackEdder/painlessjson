@@ -7,7 +7,7 @@
     "license": "BSL-1.0",
     "dependencies": {
         "dunit": "~>1.0.10",
-        "painlesstraits": "~>0.1.0"
+        "painlesstraits": "~>0.2.0"
     },
     "configurations": [
         {
