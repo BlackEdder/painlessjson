@@ -255,7 +255,7 @@ struct PointSerializationIgnore
 struct PointUseConstructor
 {
     @disable this();
-    immutable double x = 0; ///
+    double x = 0; ///
     private double _y = 1; ///
     this(double x, double y)
     {
