@@ -612,8 +612,20 @@ T fromJSON(T, SerializationOptions options = defaultSerializatonOptions)(in JSON
     {
         return T._fromJSON(json);
     }
-    else
+    else 
+    {
+        if (json.type == JSON_TYPE.NULL)
+            return T.init;
         return defaultFromJSON!(T,options)(json);
+    }
+}
+
+unittest {
+    struct P
+    { string name; }
+
+    auto jv = parseJSON(`{"name": null}`);
+    auto j = fromJSON!P(jv);
 }
 
 /// Converting common types
