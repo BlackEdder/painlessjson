@@ -6,8 +6,8 @@
     "authors": ["Edwin van Leeuwen","Pierre Krafft"],
     "license": "BSL-1.0",
     "dependencies": {
-        "dunit": "~>1.0.10",
-        "painlesstraits": "~>0.2.0"
+        "dunit": "~>1.0.14",
+        "painlesstraits": "~>0.3.0"
     },
     "configurations": [
         {
@@ -17,7 +17,7 @@
         {
             "name": "unittest",
             "dependencies": {
-                "dunit": "~>1.0.10"
+                "dunit": "~>1.0.14"
             }
         }
     ]
