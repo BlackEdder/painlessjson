@@ -8,3 +8,4 @@ bin/
 .stversions
 dub.selections.json
 tags
+*-test-unittest
