@@ -27,9 +27,27 @@ struct SerializationOptions
 
 enum defaultSerializatonOptions =  SerializationOptions(true, false);
 
-
-
-
+// staticIota is not available in newer phobos versions
+// Implement my own version (copied from phobos) 
+template myStaticIota(int beg, int end)
+{
+    static if (beg + 1 >= end)
+    {
+        static if (beg >= end)
+        {
+            alias myStaticIota = TypeTuple!();
+        }
+        else
+        {
+            alias myStaticIota = TypeTuple!(+beg);
+        }
+    }
+    else
+    {
+        enum mid = beg + (end - beg) / 2;
+        alias myStaticIota = TypeTuple!(myStaticIota!(beg, mid), myStaticIota!(mid, end));
+    }
+}
 
 //See if we can use something else than __traits(compiles, (T t){JSONValue(t);})
 private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (__traits(compiles, (in T t) {
@@ -239,7 +257,8 @@ unittest
     Tuple!(int, int) point;
     point[0] = 5;
     point[1] = 6;
-    assertEqual(toJSON(point).toString, q{{"_0":5,"_1":6}});
+    assert(toJSON(point).toString == q{{"_0LU":5,"_1LU":6}} ||
+        toJSON(point).toString == q{{"_0":5,"_1":6}});
 }
 
 /// Named tuples
@@ -479,7 +498,6 @@ private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json
  +/
 T defaultFromJSON(T, SerializationOptions options = defaultSerializatonOptions)(in JSONValue json){
     return defaultFromJSONImpl!(T, options)(json);
-    
 }
 
 template hasAccessibleDefaultsConstructor(T)
@@ -507,13 +525,11 @@ T getIntstanceFromDefaultConstructor(T)()
 
 T getInstanceFromCustomConstructor(T, alias Ctor, bool alsoAcceptUnderscore)(in JSONValue json)
 {
-    import std.typecons : staticIota;
-
     enum params = ParameterIdentifierTuple!(Ctor);
     alias defaults = ParameterDefaultValueTuple!(Ctor);
     alias Types = ParameterTypeTuple!(Ctor);
     Tuple!(Types) args;
-    foreach (i; staticIota!(0, params.length))
+    foreach (i; myStaticIota!(0, params.length))
     {
         enum paramName = params[i];
         if (paramName in json.object)
@@ -548,13 +564,11 @@ T getInstanceFromCustomConstructor(T, alias Ctor, bool alsoAcceptUnderscore)(in 
 
 bool jsonValueHasAllFieldsNeeded(alias Ctor, bool alsoAcceptUnderscore)(in JSONValue json)
 {
-    import std.typecons : staticIota;
-
     enum params = ParameterIdentifierTuple!(Ctor);
     alias defaults = ParameterDefaultValueTuple!(Ctor);
     alias Types = ParameterTypeTuple!(Ctor);
     Tuple!(Types) args;
-    foreach (i; staticIota!(0, params.length))
+    foreach (i; myStaticIota!(0, params.length))
     {
         enum paramName = params[i];
         if (!((paramName in json.object) || ( alsoAcceptUnderscore && (camelCaseToUnderscore(paramName) in json.object))) && is(defaults[i] == void))
@@ -567,14 +581,12 @@ bool jsonValueHasAllFieldsNeeded(alias Ctor, bool alsoAcceptUnderscore)(in JSONV
 
 ulong constructorOverloadScore(alias Ctor, bool alsoAcceptUnderscore)(in JSONValue json)
 {
-    import std.typecons : staticIota;
-
     enum params = ParameterIdentifierTuple!(Ctor);
     alias defaults = ParameterDefaultValueTuple!(Ctor);
     alias Types = ParameterTypeTuple!(Ctor);
     Tuple!(Types) args;
     ulong overloadScore = json.object.length;
-    foreach (i; staticIota!(0, params.length))
+    foreach (i; myStaticIota!(0, params.length))
     {
         enum paramName = params[i];
         if (paramName in json.object || ( alsoAcceptUnderscore && (camelCaseToUnderscore(paramName) in json.object)))
@@ -781,7 +793,8 @@ unittest
     Tuple!(int, int) point;
     point[0] = 5;
     point[1] = 6;
-    assertEqual(point, fromJSON!(Tuple!(int, int))(parseJSON(q{{"_0":5,"_1":6}})));
+    assertEqual(point, 
+      fromJSON!(Tuple!(int, int))(toJSON(point)));
 }
 
 /// No default constructor
