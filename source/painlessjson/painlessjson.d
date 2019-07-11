@@ -27,7 +27,18 @@ struct SerializationOptions
 
 enum defaultSerializatonOptions =  SerializationOptions(true, false);
 
-
+static if (is(typeof(JSONType.integer)))
+{
+    enum JSONType_int = JSONType.integer;
+    enum JSONType_true = JSONType.true_;
+    enum JSONType_null = JSONType.null_;
+}
+else
+{
+    enum JSONType_int = JSON_TYPE.INTEGER;
+    enum JSONType_true = JSON_TYPE.TRUE;
+    enum JSONType_null = JSON_TYPE.NULL;
+}
 
 
 
@@ -333,7 +344,7 @@ private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json
 
 private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isFloatingPoint!T)
 {
-    if (json.type == JSON_TYPE.INTEGER)
+    if (json.type == JSONType_int)
         return to!T(json.integer);
     else
         return to!T(json.floating);
@@ -346,7 +357,7 @@ private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json
 
 private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isBoolean!T)
 {
-    if (json.type == JSON_TYPE.TRUE)
+    if (json.type == JSONType_true)
         return true;
     else
         return false;
@@ -614,7 +625,7 @@ T fromJSON(T, SerializationOptions options = defaultSerializatonOptions)(in JSON
     }
     else 
     {
-        if (json.type == JSON_TYPE.NULL)
+        if (json.type == JSONType_null)
             return T.init;
         return defaultFromJSON!(T,options)(json);
     }
