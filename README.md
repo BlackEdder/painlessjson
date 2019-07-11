@@ -67,12 +67,34 @@ More detailed examples can be found in the [master branch documentation on Githu
 The library uses compile time reflection to find the fields in your classes. This generates the same code as a handwritten implementation would. It uses std.json on the backend and performance is mainly determined by the std.json implementation. At the moment of writing (2014) std.json is known to be slow compared to other languages. Hopefully, this will be improved over time.
 
 ## Tested compilers
-![DMD-2.068.0](https://img.shields.io/badge/DMD-2.068.0-brightgreen.svg)
-![DMD-2.067.1](https://img.shields.io/badge/DMD-2.067.1-brightgreen.svg)
-![DMD-2.066.1](https://img.shields.io/badge/DMD-2.066.1-brightgreen.svg)
-![DMD-2.065.0](https://img.shields.io/badge/DMD-2.065.0-red.svg)
-![LDC-0.15.1](https://img.shields.io/badge/LDC-0.15.1-brightgreen.svg)
-![GDC-4.9.2](https://img.shields.io/badge/GDC-4.9.2-brightgreen.svg)
+![DMD-2.087.0](https://img.shields.io/badge/DMD-2.087.0-brightgreen.svg)
+![DMD-2.086.1](https://img.shields.io/badge/DMD-2.086.1-brightgreen.svg)
+![DMD-2.085.1](https://img.shields.io/badge/DMD-2.085.1-brightgreen.svg)
+![DMD-2.084.1](https://img.shields.io/badge/DMD-2.084.1-brightgreen.svg)
+![DMD-2.083.1](https://img.shields.io/badge/DMD-2.083.1-brightgreen.svg)
+![DMD-2.082.1](https://img.shields.io/badge/DMD-2.082.1-brightgreen.svg)
+![DMD-2.081.2](https://img.shields.io/badge/DMD-2.081.2-brightgreen.svg)
+![DMD-2.080.1](https://img.shields.io/badge/DMD-2.080.1-brightgreen.svg)
+![DMD-2.079.1](https://img.shields.io/badge/DMD-2.079.1-brightgreen.svg)
+![DMD-2.078.3](https://img.shields.io/badge/DMD-2.078.3-brightgreen.svg)
+![DMD-2.077.1](https://img.shields.io/badge/DMD-2.077.1-brightgreen.svg)
+![DMD-2.076.1](https://img.shields.io/badge/DMD-2.076.1-brightgreen.svg)
+![DMD-2.075.1](https://img.shields.io/badge/DMD-2.075.1-red.svg)
+
+![LDC-1.16.0](https://img.shields.io/badge/LDC-1.16.0-brightgreen.svg)
+![LDC-1.15.0](https://img.shields.io/badge/LDC-1.15.0-brightgreen.svg)
+![LDC-1.14.0](https://img.shields.io/badge/LDC-1.14.0-brightgreen.svg)
+![LDC-1.13.0](https://img.shields.io/badge/LDC-1.13.0-brightgreen.svg)
+![LDC-1.12.0](https://img.shields.io/badge/LDC-1.12.0-brightgreen.svg)
+![LDC-1.11.0](https://img.shields.io/badge/LDC-1.11.0-brightgreen.svg)
+![LDC-1.10.0](https://img.shields.io/badge/LDC-1.10.0-brightgreen.svg)
+![LDC-1.9.0](https://img.shields.io/badge/LDC-1.9.0-brightgreen.svg)
+![LDC-1.8.0](https://img.shields.io/badge/LDC-1.8.0-brightgreen.svg)
+![LDC-1.7.0](https://img.shields.io/badge/LDC-1.7.0-brightgreen.svg)
+![LDC-1.6.0](https://img.shields.io/badge/LDC-1.6.0-brightgreen.svg)
+![LDC-1.5.0](https://img.shields.io/badge/LDC-1.5.0-red.svg)
+
+![GDC-8.2.1](https://img.shields.io/badge/GDC-8.2.1-red.svg)
 
 [master docs github]: http://blackedder.github.io/painlessjson/painlessjson.html
 [master docs ddocs]: http://ddocs.org/painlessjson/~master/painlessjson/painlessjson.html
