@@ -1,0 +1,1461 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>painlessjson.painlessjson</title>
+    <style type="text/css" media="screen">
+      html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p,
+      blockquote, pre, a, abbr, address, cite, code, del, dfn, em, figure,
+      img, ins, kbd, q, s, samp, small, strong, sub, sup, var, b, u, i, dl,
+      dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption,
+      tbody, tfoot, thead, tr, th, td {
+        background: transparent none repeat scroll 0 0;
+        border: 0 none;
+        font-size: 100%;
+        margin: 0;
+        outline: 0 none;
+        padding: 0;
+        vertical-align: baseline;
+      }
+
+      h1 { font-size: 200%; }
+      h2 { font-size: 160%; }
+      h3 { font-size: 120%; }
+      h4 { font-size: 100%; }
+      h5 { font-size: 80%; }
+      h6 { font-size: 80%; font-weight: normal; }
+
+      ul, ol {
+        margin: 1.4em 0;
+      }
+      ul ul, ol ol, ul ol, ol ul {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      ul, ol {
+        margin-left: 2.8em;
+      }
+
+      ol {
+        list-style: decimal;
+      }
+      ol ol {
+        list-style: lower-alpha;
+      }
+      ol ol ol {
+        list-style: lower-roman;
+      }
+      ol ol ol ol {
+        list-style: decimal;
+      }
+
+      blockquote {
+        margin: 0.1em;
+        margin-left: 1em;
+        border-left: 2px solid #cccccc;
+        padding-left: 0.7em;
+      }
+
+      .color_red { color: #dc322f; }
+      .color_blue { color: #268bd2; }
+      .color_green { color: #859901; }
+      .color_yellow { color: #b58901; }
+      .color_black { color: black; }
+      .color_white { color: white; }
+
+      .font_big {
+        font-size: 1.2em;
+      }
+
+      .ddoc_section_h {
+        font-weight: bold;
+        font-size: 13px;
+        line-height: 19.5px;
+        margin-top: 11px;
+        display: block;
+      }
+
+      body.dlang .dlang {
+        display: inline-block;
+      }
+
+      body.dlang .declaration .dlang {
+          display: block;
+      }
+
+      body.dlang .ddoc_header_anchor a.dlang {
+        display: block;
+        color: rgba(0, 136, 204, 1);
+        text-decoration: none;
+      }
+
+      body.dlang .ddoc_header_anchor .code {
+        color: rgba(0, 136, 204, 1);
+      }
+
+      #ddoc_main .module {
+          border-color: currentColor rgba(233, 233, 233, 1) rgba(233, 233, 233, 1);
+          border-style: none solid solid;
+          border-width: 0 1px 1px;
+          overflow-x: hidden;
+          padding: 15px;
+      }
+
+      #ddoc_main .section .section {
+        margin-top: 0;
+      }
+
+      #ddoc_main .ddoc_module_members_section {
+          padding: 1px 0 0;
+          transition: transform 0.3s ease 0s;
+      }
+
+      #ddoc_main .ddoc_member, #ddoc_main .ddoc_module_members section.intro {
+          background: #fff none repeat scroll 0 0;
+          list-style-type: none;
+          width: 100%;
+      }
+
+      #ddoc_main .ddoc_header_anchor {
+          font-size: 1.4em;
+          transition: transform 0.3s ease 0s;
+      }
+
+      #ddoc_main .ddoc_header_anchor > .code {
+          display: inline-block;
+
+      }
+
+      #ddoc_main .ddoc_decl {
+        background-color: transparent;
+        height: 100%;
+        left: 0;
+        top: 0;
+        padding: 0;
+        padding-left: 15px;
+      }
+
+      #ddoc_main .ddoc_decl .section, #ddoc_main .section.ddoc_sections {
+        background: white none repeat scroll 0 0;
+        margin: 0;
+        padding: 5px;
+        position: relative;
+        border-radius: 5px;
+      }
+
+      #ddoc_main .ddoc_decl .section h4:first-of-type, #ddoc_main .section.ddoc_sections h4:first-of-type {
+        font-size: 13px;
+        line-height: 1.5;
+        margin-top: 21px;
+      }
+
+      #ddoc_main .section .declaration {
+          margin-top: 21px;
+      }
+
+      #ddoc_main .section .declaration .code {
+          color: rgba(0, 0, 0, 1);
+          margin-bottom: 15px;
+          padding-bottom: 6px;
+      }
+
+      #ddoc_main .declaration div .para {
+          margin-bottom: 0;
+      }
+
+      #ddoc_main .ddoc_params .graybox tr td:first-of-type {
+        padding: 7px;
+        text-align: right;
+        vertical-align: top;
+        word-break: normal;
+        white-space: nowrap;
+      }
+
+      #ddoc_main .ddoc_params .graybox {
+        border: 0 none;
+      }
+
+      #ddoc_main .ddoc_params .graybox td {
+        border-color: rgba(214, 214, 214, 1);
+      }
+
+      #ddoc_main .ddoc_params .graybox tr:first-child > td {
+        border-top: 0 none;
+      }
+
+      #ddoc_main .ddoc_params .graybox tr:last-child > td {
+        border-bottom: 0 none;
+      }
+
+      #ddoc_main .ddoc_params .graybox tr > td:first-child {
+        border-left: 0 none;
+      }
+
+      #ddoc_main .ddoc_params .graybox tr > td:last-child {
+        border-right: 0 none;
+        width: 100%;
+      }
+
+      #ddoc_main em.term, #ddoc_main em.term .code {
+        color: rgba(65, 65, 65, 1);
+        font-size: 12px;
+        font-style: italic;
+        line-height: 1.5;
+      }
+
+      #ddoc_main .see-also {
+        cursor: pointer;
+        font-family: Menlo,monospace;
+      }
+
+      #ddoc_main .ddoc_decl .section > div:last-of-type {
+        margin-bottom: 15px;
+      }
+
+      #ddoc_main .ddoc_member, #ddoc_main .ddoc_module_members {
+          transition: transform 0.3s ease 0s;
+      }
+
+      #ddoc_main .code_sample {
+        background: inherit;
+      }
+
+      #ddoc_main .declaration .code-line {
+          display: block;
+          font: 1em Menlo,monospace;
+      }
+
+      #ddoc_main a[name] {
+        margin: -112px 0 0;
+        padding-top: 112px;
+      }
+
+      #ddoc_main .ddoc_decl td {
+        max-width: inherit;
+      }
+
+      #ddoc_main .declaration a {
+        color: inherit;
+      }
+
+      #ddoc_main .declaration a:hover {
+          color: rgba(0, 136, 204, 1);
+          text-decoration: underline;
+      }
+
+      body.ddoc {
+        background-color: transparent;
+        color: rgba(0, 0, 0, 1);
+        font-family: Helvetica,Arial,sans-serif;
+        font-size: 62.5%;
+        margin: 0;
+        border: 0;
+        left: 0;
+        top: 0;
+        padding: 0;
+      }
+
+      .ddoc a[name] {
+        display: block;
+        height: 0;
+        margin: -85px 0 0;
+        padding-top: 85px;
+        width: 0;
+      }
+
+      .ddoc .module {
+          border-color: transparent;
+          background-color: rgba(255, 255, 255, 1);
+          border-color: currentColor rgba(233, 233, 233, 1) rgba(233, 233, 233, 1);
+          border-image: none;
+          border-style: none solid solid;
+          border-width: 0 1px 1px;
+          box-shadow: 0 0 1px rgba(0, 0, 0, 0.07);
+          display: block;
+          margin-left: 0;
+          min-height: calc(100% - 173px);
+          overflow: auto;
+          padding-bottom: 100px;
+      }
+
+      .ddoc .content_wrapper {
+          background-color: rgba(242, 242, 242, 1);
+          margin: 0 auto;
+          max-width: 980px;
+      }
+
+      .ddoc .section {
+        padding: 15px 25px 30px;
+      }
+
+      .ddoc .section .section {
+        margin: 30px 0 0;
+        padding: 0;
+      }
+
+      .ddoc .para {
+        color: rgba(65, 65, 65, 1);
+        font-size: 1.4em;
+        line-height: 145%;
+        margin-bottom: 15px;
+      }
+
+      .ddoc .ddoc_examples .para {
+        margin-bottom: 0;
+      }
+
+      .ddoc .module_name {
+          color: rgba(0, 0, 0, 1);
+          display: block;
+          font-family: Helvetica;
+          font-size: 2.8em;
+          font-weight: 100;
+          margin-bottom: 0;
+          padding: 15px 0;
+      }
+
+      .ddoc .module a {
+          color: rgba(0, 136, 204, 1);
+          text-decoration: none;
+      }
+
+      .ddoc .code {
+        color: rgba(128, 128, 128, 1);
+        font-family: Menlo,monospace;
+        font-size: 0.85em;
+        word-wrap: break-word;
+      }
+
+      .ddoc .code i {
+        font-style: normal;
+      }
+
+      .ddoc .code .code {
+        font-size: 1em;
+      }
+
+      .ddoc .code_sample {
+        background-clip: padding-box;
+        margin: 1px 0;
+        text-align: left;
+      }
+
+      .ddoc .code_sample {
+        display: block;
+        font-size: 1.4em;
+        margin-left: 21px;
+      }
+
+      .ddoc ol .code_sample {
+        font-size: 1em;
+      }
+
+      .ddoc .code_lines {
+        counter-reset: li;
+        line-height: 1.6em;
+        list-style: outside none none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .ddoc .code_listing .code_sample div {
+        margin-left: 13px;
+        width: 93%;
+      }
+
+      .ddoc .code_listing .code_sample div .code_lines li {
+        list-style-type: none;
+        margin: 0;
+        padding-right: 10px;
+      }
+
+      .ddoc .code_sample div .code_lines li::before {
+        margin-left: -33px;
+        margin-right: 25px;
+      }
+
+      .ddoc .code_sample div .code_lines li:nth-child(n+10)::before {
+        margin-left: -39px;
+        margin-right: 25px;
+      }
+
+      .ddoc .code_sample div .code_lines li:nth-child(n+100)::before {
+        margin-left: -46px;
+        margin-right: 25px;
+      }
+
+      .ddoc .code_sample .code_lines .code {
+        color: #000;
+      }
+
+      .ddoc div.dlang {
+        margin: 10px 0 21px;
+        padding: 4px 0 2px 10px;
+      }
+
+      .ddoc div.dlang {
+          margin: 10px 0 21px;
+          padding: 4px 0 2px 10px;
+      }
+
+      .ddoc div.dlang {
+        border-left: 5px solid rgba(0, 155, 51, 0.2);
+      }
+
+      .ddoc .code_lines li::before {
+        color: rgba(128, 128, 128, 1);
+        content: counter(li, decimal);
+        counter-increment: li;
+        font-family: Menlo,monospace;
+        font-size: 0.9em;
+        margin-right: 16px;
+      }
+
+      .ddoc .code_lines li {
+        padding-left: 0;
+        white-space: pre-wrap;
+      }
+
+      .ddoc .code_lines li:only-of-type::before {
+        color: rgba(255, 255, 255, 1);
+        content: " ";
+      }
+
+      .ddoc .code_lines li:only-of-type {
+        color: rgba(255, 255, 255, 1);
+        content: " ";
+      }
+
+      .ddoc .code_lines li:nth-child(n+10) {
+        text-indent: -17px;
+      }
+
+      .ddoc .code_lines li:nth-child(n+10)::before {
+        margin-right: 12px;
+      }
+
+      .ddoc .graybox {
+        border: 1px solid rgba(233, 233, 233, 1);
+        border-collapse: collapse;
+        border-spacing: 0;
+        empty-cells: hide;
+        margin: 20px 0 36px;
+        text-align: left;
+      }
+
+      .ddoc .graybox p {
+        margin: 0;
+        min-width: 50px;
+      }
+
+      .ddoc th {
+        margin: 0;
+        max-width: 260px;
+        padding: 5px 10px 5px 10px;
+        vertical-align: bottom;
+      }
+
+      .ddoc td {
+        border: 1px solid rgba(233, 233, 233, 1);
+        margin: 0;
+        max-width: 260px;
+        padding: 5px 10px 5px 10px;
+        vertical-align: middle;
+      }
+
+      .punctuation {
+        color: rgba(0, 0, 0, 1);
+      }
+
+      .comment {
+        color: rgba(0, 131, 18, 1);
+      }
+
+      .operator {
+        color: #000;
+      }
+
+      .keyword {
+        color: rgba(170, 13, 145, 1);
+      }
+
+      .keyword_type {
+        color: rgba(170, 51, 145, 1);
+      }
+
+      .string_literal {
+        color: rgba(196, 26, 22, 1);
+      }
+
+      .ddoc_psuper_symbol {
+        color: rgba(92, 38, 153, 1);
+      }
+
+      .param {
+        color: rgba(0, 0, 0, 1);
+      }
+
+      .psymbol {
+        color: rgba(0, 0, 0, 1);
+      }
+
+      .ddoc_member_header .ddoc_header_anchor .code {
+        font-size: 1em;
+      }
+    </style>
+  </head>
+  <body id="ddoc_main" class="ddoc dlang">
+    <div class="content_wrapper">
+      <article class="module">
+        <h1 class="module_name">painlessjson.painlessjson</h1>
+        <section id="module_content">
+<section class="section ddoc_module_members_section">
+  <div class="ddoc_module_members">
+    <ul class="ddoc_members">
+  <li class="ddoc_member">
+  <div class="ddoc_member_header">
+  <div class="ddoc_header_anchor">
+  <a href="#defaultToJSON" id="defaultToJSON"><code class="code">defaultToJSON</code></a>
+</div>
+</div><div class="ddoc_decl">
+  <section class="section">
+    <div class="declaration">
+      <h4>Declaration</h4>
+      <div class="dlang">
+        <p class="para">
+          <code class="code">
+            <span class="ddoc_anchor" id="defaultToJSON"></span>JSONValue <code class="code">defaultToJSON</code>(T, SerializationOptions options = defaultSerializatonOptions)(in T <code class="code">t</code>);
+
+          </code>
+        </p>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="ddoc_decl">
+  <section class="section ddoc_sections">
+  <div class="ddoc_summary">
+  <p class="para">
+    Convert any type to JSON<br />
+ Can be overridden by &#95;toJSON
+  </p>
+</div>
+
+</section>
+
+</div>
+
+</li><li class="ddoc_member">
+  <div class="ddoc_member_header">
+  <div class="ddoc_header_anchor">
+  <a href="#toJSON" id="toJSON"><code class="code">toJSON</code></a>
+</div>
+</div><div class="ddoc_decl">
+  <section class="section">
+    <div class="declaration">
+      <h4>Declaration</h4>
+      <div class="dlang">
+        <p class="para">
+          <code class="code">
+            <span class="ddoc_anchor" id="toJSON"></span>JSONValue <code class="code">toJSON</code>(T, SerializationOptions options = defaultSerializatonOptions)(in T <code class="code">t</code>);
+
+          </code>
+        </p>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="ddoc_decl">
+  <section class="section ddoc_sections">
+  <div class="ddoc_summary">
+  <p class="para">
+    Template function that converts any object to JSON
+  </p>
+</div>
+<div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Converting common types
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">assertEqual(5.<span class="psymbol">toJSON</span>!<span class="keyword">int</span>, JSONValue(5));
+<span class="keyword">assert</span>(4.<span class="psymbol">toJSON</span> != JSONValue(5)); <span class="comment">//TODO: Wait for DUnit to implement assertNotEqual
+</span>assertEqual(5.4.<span class="psymbol">toJSON</span>, JSONValue(5.4));
+assertEqual(<span class="psymbol">toJSON</span>(<span class="string_literal">"test"</span>), JSONValue(<span class="string_literal">"test"</span>));
+assertEqual(<span class="psymbol">toJSON</span>(JSONValue(<span class="string_literal">"test"</span>)), JSONValue(<span class="string_literal">"test"</span>));
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Converting InputRanges
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">assertEqual([1, 2].<span class="psymbol">toJSON</span>.toString, <span class="string_literal">"[1,2]"</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    User structs
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">Point p;
+assertEqual(<span class="psymbol">toJSON</span>(p).toString, <span class="string_literal">q{{"x":0,"y":1}}</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Array of structs
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">Point[] ps = [Point(-1, 1), Point(2, 3)];
+assertEqual(<span class="psymbol">toJSON</span>(ps).toString, <span class="string_literal">q{[{"x":-1,"y":1},{"x":2,"y":3}]}</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    User class
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">PointC p = <span class="keyword">new</span> PointC(1, -2);
+assertEqual(<span class="psymbol">toJSON</span>(p).toString, <span class="string_literal">q{{"x":1,"y":-2}}</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    User class with private fields
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">PointPrivate p = <span class="keyword">new</span> PointPrivate(-1, 2);
+assertEqual(<span class="psymbol">toJSON</span>(p).toString, <span class="string_literal">q{{"x":-1,"y":2}}</span>);
+<span class="keyword">auto</span> pnt = p.<span class="psymbol">toJSON</span>.fromJSON!PointPrivate;
+assertEqual(p.x, -1);
+assertEqual(p.y, 2);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    User class with defaultToJSON
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">PointDefaultFromJSON p = <span class="keyword">new</span> PointDefaultFromJSON(-1, 2);
+assertEqual(<span class="psymbol">toJSON</span>(p).toString, <span class="string_literal">q{{"_x":-1,"y":2}}</span>);
+<span class="keyword">auto</span> pnt = p.<span class="psymbol">toJSON</span>.fromJSON!PointDefaultFromJSON;
+assertEqual(p.x, -1);
+assertEqual(p.y, 2);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    User class with private fields and @property
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> p = PointPrivateProperty(-1, 2);
+assertEqual(<span class="psymbol">toJSON</span>(p).toString, <span class="string_literal">q{{"x":-1,"y":2,"z":1}}</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    User class with SerializedName annotation
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> p = PointSerializationName(-1, 2);
+assertEqual(<span class="psymbol">toJSON</span>(p)[<span class="string_literal">"xOut"</span>].floating, -1);
+assertEqual(<span class="psymbol">toJSON</span>(p)[<span class="string_literal">"yOut"</span>].floating, 2);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    User class with SerializeIgnore annotations
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> p = PointSerializationIgnore(-1, 5, 4);
+assertEqual(<span class="psymbol">toJSON</span>(p).toString, <span class="string_literal">q{{"z":5}}</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Array of classes
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">PointC[] ps = [<span class="keyword">new</span> PointC(-1, 1), <span class="keyword">new</span> PointC(2, 3)];
+assertEqual(<span class="psymbol">toJSON</span>(ps).toString, <span class="string_literal">q{[{"x":-1,"y":1},{"x":2,"y":3}]}</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Associative array
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">string[<span class="keyword">int</span>] aa = [0 : <span class="string_literal">"a"</span>, 1 : <span class="string_literal">"b"</span>];
+<span class="keyword">assert</span>(aa.<span class="psymbol">toJSON</span>.toString == <span class="string_literal">q{{"0":"a","1":"b"}}</span>);
+Point[<span class="keyword">int</span>] aaStruct = [0 : Point(-1, 1), 1 : Point(2, 0)];
+assertEqual(aaStruct.<span class="psymbol">toJSON</span>.toString, <span class="string_literal">q{{"0":{"x":-1,"y":1},"1":{"x":2,"y":0}}}</span>);
+assertEqual([<span class="string_literal">"key"</span>: <span class="string_literal">"value"</span>].<span class="psymbol">toJSON</span>.toString, <span class="string_literal">q{{"key":"value"}}</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Associative array containing struct
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">assertEqual([<span class="string_literal">"test"</span>: SimpleStruct(<span class="string_literal">"test2"</span>)].<span class="psymbol">toJSON</span>().toString, <span class="string_literal">q{{"test":{"str":"test2"}}}</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Associative array with struct key
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">assertEqual([SimpleStruct(<span class="string_literal">"key"</span>): <span class="string_literal">"value"</span>, SimpleStruct(<span class="string_literal">"key2"</span>): <span class="string_literal">"value2"</span>].<span class="psymbol">toJSON</span>().toString, <span class="string_literal">q{{"{\"str\":\"key\"}":"value","{\"str\":\"key2\"}":"value2"}}</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    struct with inner struct and AA
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> testStruct = StructWithStructAndAA([<span class="string_literal">"key1"</span>: <span class="string_literal">"value1"</span>], [<span class="string_literal">"key2"</span>: StructWithStructAndAA.Inner(<span class="string_literal">"value2"</span>)]);
+<span class="keyword">auto</span> converted = testStruct.<span class="psymbol">toJSON</span>();
+assertEqual(converted[<span class="string_literal">"stringToInner"</span>].toString, <span class="string_literal">q{{"key2":{"str":"value2"}}}</span>);
+assertEqual(converted[<span class="string_literal">"stringToString"</span>].toString, <span class="string_literal">q{{"key1":"value1"}}</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Unnamed tuples
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">Tuple!(<span class="keyword">int</span>, <span class="keyword">int</span>) point;
+point[0] = 5;
+point[1] = 6;
+assertEqual(<span class="psymbol">toJSON</span>(point).toString, <span class="string_literal">q{{"_0":5,"_1":6}}</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Named tuples
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">Tuple!(<span class="keyword">int</span>, <span class="string_literal">"x"</span>, <span class="keyword">int</span>, <span class="string_literal">"y"</span>) point;
+point.x = 5;
+point.y = 6;
+assertEqual(point, fromJSON!(Tuple!(<span class="keyword">int</span>, <span class="string_literal">"x"</span>, <span class="keyword">int</span>, <span class="string_literal">"y"</span>))(parseJSON(<span class="string_literal">q{{"x":5,"y":6}}</span>)));
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Convert camel case to underscore automatically
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">CamelCaseConversion value;
+value.wasCamelCase = 5;
+value.was_underscore = 7;
+
+<span class="keyword">auto</span> valueAsJSON = value.<span class="psymbol">toJSON</span>!(CamelCaseConversion,SerializationOptions(<span class="keyword">false</span>, <span class="keyword">true</span>));
+
+assertEqual(valueAsJSON[<span class="string_literal">"was_camel_case"</span>].integer, 5); 
+assertEqual(valueAsJSON[<span class="string_literal">"was_underscore"</span>].integer, 7);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Overloaded <code class="code">toJSON</code>
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">class</span> A
+{
+    <span class="keyword">double</span> x = 0;
+    <span class="keyword">double</span> y = 1;
+    JSONValue <span class="psymbol">toJSON</span>()
+    {
+        JSONValue[string] json;
+        json[<span class="string_literal">"x"</span>] = x;
+        <span class="keyword">return</span> JSONValue(json);
+    }
+
+}
+
+<span class="keyword">auto</span> a = <span class="keyword">new</span> A;
+assertEqual(a.<span class="psymbol">toJSON</span>.toString, <span class="string_literal">q{{"x":0}}</span>);
+
+<span class="keyword">class</span> B
+{
+    <span class="keyword">double</span> x = 0;
+    <span class="keyword">double</span> y = 1;
+}
+
+<span class="comment">// Both templates will now work for B, so this is ambiguous in D.
+</span><span class="comment">// Under dmd it looks like the toJSON!T that is loaded first is the one used
+</span>JSONValue <span class="psymbol">toJSON</span>(T : B)(T b)
+{
+    JSONValue[string] json;
+    json[<span class="string_literal">"x"</span>] = b.x;
+    <span class="keyword">return</span> JSONValue(json);
+}
+
+<span class="keyword">auto</span> b = <span class="keyword">new</span> B;
+assertEqual(b.<span class="psymbol">toJSON</span>.toString, <span class="string_literal">q{{"x":0,"y":1}}</span>);
+
+<span class="keyword">class</span> Z
+{
+    <span class="keyword">double</span> x = 0;
+    <span class="keyword">double</span> y = 1;
+    <span class="comment">// Adding an extra value
+</span>    JSONValue <span class="psymbol">toJSON</span>()
+    {
+        JSONValue[string] json = painlessjson.<span class="psymbol">toJSON</span>!Z(<span class="keyword">this</span>).object;
+        json[<span class="string_literal">"add"</span>] = <span class="string_literal">"bla"</span>.<span class="psymbol">toJSON</span>;
+        <span class="keyword">return</span> JSONValue(json);
+    }
+
+}
+
+<span class="keyword">auto</span> z = <span class="keyword">new</span> Z;
+assertEqual(z.<span class="psymbol">toJSON</span>[<span class="string_literal">"x"</span>].floating, 0);
+assertEqual(z.<span class="psymbol">toJSON</span>[<span class="string_literal">"y"</span>].floating, 1);
+assertEqual(z.<span class="psymbol">toJSON</span>[<span class="string_literal">"add"</span>].str, <span class="string_literal">"bla"</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div>
+</section>
+
+</div>
+
+</li><li class="ddoc_member">
+  <div class="ddoc_member_header">
+  <div class="ddoc_header_anchor">
+  <a href="#defaultFromJSON" id="defaultFromJSON"><code class="code">defaultFromJSON</code></a>
+</div>
+</div><div class="ddoc_decl">
+  <section class="section">
+    <div class="declaration">
+      <h4>Declaration</h4>
+      <div class="dlang">
+        <p class="para">
+          <code class="code">
+            <span class="ddoc_anchor" id="defaultFromJSON"></span>T <code class="code">defaultFromJSON</code>(T, SerializationOptions options = defaultSerializatonOptions)(in JSONValue <code class="code">json</code>);
+
+          </code>
+        </p>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="ddoc_decl">
+  <section class="section ddoc_sections">
+  <div class="ddoc_summary">
+  <p class="para">
+    Convert to given type from JSON.<br />
+ Can be overridden by &#95;fromJSON.
+  </p>
+</div>
+
+</section>
+
+</div>
+
+</li><li class="ddoc_member">
+  <div class="ddoc_member_header">
+  <div class="ddoc_header_anchor">
+  <a href="#fromJSON" id="fromJSON"><code class="code">fromJSON</code></a>
+</div>
+</div><div class="ddoc_decl">
+  <section class="section">
+    <div class="declaration">
+      <h4>Declaration</h4>
+      <div class="dlang">
+        <p class="para">
+          <code class="code">
+            <span class="ddoc_anchor" id="fromJSON"></span>T <code class="code">fromJSON</code>(T, SerializationOptions options = defaultSerializatonOptions)(in JSONValue <code class="code">json</code>);
+
+          </code>
+        </p>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="ddoc_decl">
+  <section class="section ddoc_sections">
+  <div class="ddoc_summary">
+  <p class="para">
+    Convert from JSONValue to any other type
+  </p>
+</div>
+<div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Converting common types
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">assertEqual(<span class="psymbol">fromJSON</span>!<span class="keyword">int</span>(JSONValue(1)), 1);
+assertEqual(<span class="psymbol">fromJSON</span>!<span class="keyword">double</span>(JSONValue(1.0)), 1);
+assertEqual(<span class="psymbol">fromJSON</span>!<span class="keyword">double</span>(JSONValue(1.3)), 1.3);
+assertEqual(<span class="psymbol">fromJSON</span>!string(JSONValue(<span class="string_literal">"str"</span>)), <span class="string_literal">"str"</span>);
+assertEqual(<span class="psymbol">fromJSON</span>!<span class="keyword">bool</span>(JSONValue(<span class="keyword">true</span>)), <span class="keyword">true</span>);
+assertEqual(<span class="psymbol">fromJSON</span>!<span class="keyword">bool</span>(JSONValue(<span class="keyword">false</span>)), <span class="keyword">false</span>);
+assertEqual(<span class="psymbol">fromJSON</span>!JSONValue(JSONValue(<span class="keyword">true</span>)), JSONValue(<span class="keyword">true</span>));
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Converting arrays
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">assertEqual(<span class="psymbol">fromJSON</span>!(<span class="keyword">int</span>[])(toJSON([1, 2])), [1, 2]);
+assertEqual(<span class="psymbol">fromJSON</span>!(Point[])(parseJSON(<span class="string_literal">q{[{"x":-1,"y":2},{"x":3,"y":4}]}</span>)), [Point(-1,2),Point(3,4)]);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Array as member of other class
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="comment">// Types need to be defined in different module, otherwise 
+</span><span class="comment">// type is not known at compile time
+</span><span class="keyword">import</span> painlessjson.unittesttypes_local_import;
+
+string jsonString = <span class="string_literal">q{[ {"duration": "10"} ]}</span>;
+Route[] routes = parseJSON(jsonString).<span class="psymbol">fromJSON</span>!(Route[]);
+assertEqual(routes.length, 1);
+
+jsonString = <span class="string_literal">q{{"routes":[ {"duration": "10"} ] }}</span>;
+JourneyPlan jp;
+jp = parseJSON(jsonString).<span class="psymbol">fromJSON</span>!JourneyPlan;
+assertEqual(jp.routes.length, 1);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Associative arrays
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">string[<span class="keyword">int</span>] aaInt = [0 : <span class="string_literal">"a"</span>, 1 : <span class="string_literal">"b"</span>];
+assertEqual(aaInt, <span class="psymbol">fromJSON</span>!(string[<span class="keyword">int</span>])(parseJSON(<span class="string_literal">q{{"0" : "a", "1": "b"}}</span>)));
+
+string[string] aaString = [<span class="string_literal">"hello"</span> : <span class="string_literal">"world"</span>, <span class="string_literal">"json"</span> : <span class="string_literal">"painless"</span>];
+assertEqual(aaString, <span class="psymbol">fromJSON</span>!(string[string])(parseJSON(<span class="string_literal">q{{"hello" : "world", "json" : "painless"}}</span>)));
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Associative array containing struct
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> parsed = <span class="psymbol">fromJSON</span>!(SimpleStruct[string])(parseJSON(<span class="string_literal">q{{"key": {"str": "value"}}}</span>));
+assertEqual(parsed , [<span class="string_literal">"key"</span>: SimpleStruct(<span class="string_literal">"value"</span>)]);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Associative array with struct key
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">JSONValue value = parseJSON(<span class="string_literal">q{{"{\"str\":\"key\"}":"value", "{\"str\":\"key2\"}":"value2"}}</span>);
+<span class="keyword">auto</span> parsed = <span class="psymbol">fromJSON</span>!(string[SimpleStruct])(value);
+assertEqual(
+    parsed
+    , [SimpleStruct(<span class="string_literal">"key"</span>): <span class="string_literal">"value"</span>, SimpleStruct(<span class="string_literal">"key2"</span>): <span class="string_literal">"value2"</span>]);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    struct with inner struct and AA
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> testStruct = StructWithStructAndAA([<span class="string_literal">"key1"</span>: <span class="string_literal">"value1"</span>], [<span class="string_literal">"key2"</span>: StructWithStructAndAA.Inner(<span class="string_literal">"value2"</span>)]);
+<span class="keyword">auto</span> testJSON = parseJSON(<span class="string_literal">q{{"stringToInner":{"key2":{"str":"value2"}},"stringToString":{"key1":"value1"}}}</span>);
+assertEqual(<span class="psymbol">fromJSON</span>!StructWithStructAndAA(testJSON), testStruct);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Error reporting from inner objects
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">import</span> std.exception : collectExceptionMsg;
+<span class="keyword">import</span> std.algorithm : canFind;
+<span class="keyword">void</span> throwFunc() {
+    <span class="psymbol">fromJSON</span>!(string[SimpleStruct])(parseJSON(<span class="string_literal">q{{"{\"str\": \"key1\"}": "value", "key2":"value2"}}</span>));
+}
+<span class="keyword">auto</span> errorMessage = collectExceptionMsg(throwFunc());
+<span class="keyword">assert</span>(errorMessage.canFind(<span class="string_literal">"key2"</span>));
+<span class="keyword">assert</span>(errorMessage.canFind(<span class="string_literal">"string[SimpleStruct]"</span>));
+<span class="keyword">assert</span>(!errorMessage.canFind(<span class="string_literal">"key1"</span>));
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Structs from JSON
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> p = <span class="psymbol">fromJSON</span>!Point(parseJSON(<span class="string_literal">q{{"x":-1,"y":2}}</span>));
+assertEqual(p.x, -1);
+assertEqual(p.y, 2);
+p = <span class="psymbol">fromJSON</span>!Point(parseJSON(<span class="string_literal">q{{"x":2}}</span>));
+assertEqual(p.x, 2);
+assertEqual(p.y, 1);
+p = <span class="psymbol">fromJSON</span>!Point(parseJSON(<span class="string_literal">q{{"y":3}}</span>));
+assertEqual(p.x, 0);
+assertEqual(p.y, 3);
+p = <span class="psymbol">fromJSON</span>!Point(parseJSON(<span class="string_literal">q{{"x":-1,"y":2,"z":3}}</span>));
+assertEqual(p.x, -1);
+assertEqual(p.y, 2);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Class from JSON
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> p = <span class="psymbol">fromJSON</span>!PointC(parseJSON(<span class="string_literal">q{{"x":-1,"y":2}}</span>));
+assertEqual(p.x, -1);
+assertEqual(p.y, 2);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Convert class from JSON using "fromJSON"
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> p = <span class="psymbol">fromJSON</span>!PointPrivate(parseJSON(<span class="string_literal">q{{"x":-1,"y":2}}</span>));
+assertEqual(p.x, -1);
+assertEqual(p.y, 2);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Convert struct from JSON using properties
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> p = <span class="psymbol">fromJSON</span>!PointPrivateProperty(parseJSON(<span class="string_literal">q{{"x":-1,"y":2,"z":3}}</span>));
+assertEqual(p.x, -1);
+assertEqual(p.y, 2);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    User class with SerializedName annotation
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> p = <span class="psymbol">fromJSON</span>!PointSerializationName(parseJSON(<span class="string_literal">q{{"xOut":-1,"yOut":2}}</span>));
+assertEqual(p.x, 2);
+assertEqual(p.y, -1);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    User class with SerializeIgnore annotations
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> p = <span class="psymbol">fromJSON</span>!PointSerializationIgnore(parseJSON(<span class="string_literal">q{{"z":15}}</span>));
+assertEqual(p.x, 0);
+assertEqual(p.y, 1);
+assertEqual(p.z, 15);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Unnamed tuples
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code">Tuple!(<span class="keyword">int</span>, <span class="keyword">int</span>) point;
+point[0] = 5;
+point[1] = 6;
+assertEqual(point, <span class="psymbol">fromJSON</span>!(Tuple!(<span class="keyword">int</span>, <span class="keyword">int</span>))(parseJSON(<span class="string_literal">q{{"_0":5,"_1":6}}</span>)));
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    No default constructor
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> p = <span class="psymbol">fromJSON</span>!PointUseConstructor(parseJSON(<span class="string_literal">q{{"x":2, "y":5}}</span>));
+assertEqual(p.x, 2);
+assertEqual(p.y, 5);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Multiple constructors and all JSON-values are there
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> person = <span class="psymbol">fromJSON</span>!IdAndName(parseJSON(<span class="string_literal">q{{"id":34, "name": "Jason Pain"}}</span>));
+assertEqual(person.id, 34);
+assertEqual(person.name, <span class="string_literal">"Jason Pain"</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Multiple constructors and some JSON-values are missing
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> person = <span class="psymbol">fromJSON</span>!IdAndName(parseJSON(<span class="string_literal">q{{"id":34}}</span>));
+assertEqual(person.id, 34);
+assertEqual(person.name, <span class="string_literal">"Undefined"</span>);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div><div class="ddoc_examples">
+  <h4>Examples</h4>
+  <p class="para">
+    Accept underscore and convert it to camelCase automatically
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">auto</span> value = <span class="psymbol">fromJSON</span>!CamelCaseConversion(parseJSON(<span class="string_literal">q{{"was_camel_case":8,"was_underscore":9}}</span>));
+assertEqual(value.wasCamelCase, 8);
+assertEqual(value.was_underscore, 9);
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div>
+</section>
+
+</div>
+
+</li>
+</ul>
+  </div>
+</section>
+</section>
+      </article>
+    </div>
+  </body>
+</html>
