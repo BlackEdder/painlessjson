@@ -6,6 +6,8 @@ matrix:
   - d: dmd
     env:
     - secure: F1pwSI3BTHI/W0vaUNr2HeS7+25jLJiH2CF9pTW7cySKJGJkyOJ6gJkv71HYxq/cYVda8Y7qy+a//lZFQeWlEmMW4FTblXTE0qVvUzfCw3VRKLGYIMMMi2JzyWJODH+8Q2m19mS9OneZR5zL2NmopJn6wGrfUWZZuerk3XP57C0=
+    - USE_NETWORK=true
+    - USE_NETWORK=false
   - d: dmd-2.087.0
   - d: dmd-2.086.1
   - d: dmd-2.085.1
