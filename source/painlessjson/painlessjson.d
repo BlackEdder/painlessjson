@@ -27,7 +27,18 @@ struct SerializationOptions
 
 enum defaultSerializatonOptions =  SerializationOptions(true, false);
 
-
+static if (is(typeof(JSONType.integer)))
+{
+    enum JSONType_int = JSONType.integer;
+    enum JSONType_true = JSONType.true_;
+    enum JSONType_null = JSONType.null_;
+}
+else
+{
+    enum JSONType_int = JSON_TYPE.INTEGER;
+    enum JSONType_true = JSON_TYPE.TRUE;
+    enum JSONType_null = JSON_TYPE.NULL;
+}
 
 
 
@@ -75,8 +86,22 @@ private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object
     return JSONValue(jsonAA);
 }
 
+// platform-independent tuple serializer using _0, _1, ... keys for unnamed keys (because key names could either be _0, _0UL or something else which is implmenetation defined)
+private JSONValue defaultToJSONImpl(T, SerializationOptions options)(in T object) if (is(T : Tuple!U, U...))
+{
+    JSONValue[string] jsonAA;
+    static foreach (i, name; T.fieldNames)
+    {
+        static if (name.length != 0)
+            jsonAA[name] = object[i].toJSON;
+        else
+            jsonAA["_" ~ (cast(int)i).to!string] = object[i].toJSON;
+    }
+    return JSONValue(jsonAA);
+}
+
 private JSONValue defaultToJSONImpl(T, SerializationOptions options )(in T object) if (!isBuiltinType!T
-        && !__traits(compiles, (in T t) { JSONValue(t); }))
+        && !is(T : Tuple!U, U...) && !__traits(compiles, (in T t) { JSONValue(t); }))
 {
     JSONValue[string] json;
     // Getting all member variables (there is probably an easier way)
@@ -88,7 +113,8 @@ private JSONValue defaultToJSONImpl(T, SerializationOptions options )(in T objec
                         object, name).toJSON;
                 }) && !hasAnyOfTheseAnnotations!(__traits(getMember, object,
             name), SerializeIgnore, SerializeToIgnore)
-            && isFieldOrProperty!(__traits(getMember, object, name)))
+            && isFieldOrProperty!(__traits(getMember, object, name))
+            && __traits(getProtection, __traits(getMember, object, name)) != "private")
         {
             json[serializationToName!(__traits(getMember, object, name), name,(options.convertToUnderscore))] = __traits(getMember,
                 object, name).toJSON;
@@ -333,7 +359,7 @@ private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json
 
 private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isFloatingPoint!T)
 {
-    if (json.type == JSON_TYPE.INTEGER)
+    if (json.type == JSONType_int)
         return to!T(json.integer);
     else
         return to!T(json.floating);
@@ -346,7 +372,7 @@ private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json
 
 private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (isBoolean!T)
 {
-    if (json.type == JSON_TYPE.TRUE)
+    if (json.type == JSONType_true)
         return true;
     else
         return false;
@@ -392,11 +418,30 @@ private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json
     return t;
 }
 
+// Default tuple implementation
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (is(T : Tuple!U, U...))
+{
+    T t;
+    const JSONValue[string] jsonAA = json.object;
+    static foreach (i, name; T.fieldNames)
+    {{
+        static if (name.length != 0)
+            enum effectiveName = name;
+        else
+            enum effectiveName = "_" ~ (cast(int)i).to!string;
+
+        if (auto v = effectiveName in jsonAA)
+            t[i] = fromJSON!(typeof(t[i]))(*v);
+    }}
+    return t;
+}
+
 /++
  Convert to given type from JSON.<br />
  Can be overridden by &#95;fromJSON.
  +/
-private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json) if (!isBuiltinType!T &&  !is(T == JSONValue))
+private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json)
+    if (!isBuiltinType!T &&  !is(T == JSONValue) && !is(T : Tuple!U, U...))
 {
     static if (hasAccessibleDefaultsConstructor!(T))
     {
@@ -471,6 +516,8 @@ private T defaultFromJSONImpl(T, SerializationOptions options)(in JSONValue json
                 "JSONValue can't satisfy any constructor: " ~ json.toPrettyString);
         }
     }
+    else static assert(false, "Cannot be automatically generate a defaultFromJSONImpl for type " ~ T.stringof
+        ~ ". (no accessible and suitable constructors) Create a _fromJSON member method for custom deserialization.");
 }
 
 /++
@@ -507,14 +554,12 @@ T getIntstanceFromDefaultConstructor(T)()
 
 T getInstanceFromCustomConstructor(T, alias Ctor, bool alsoAcceptUnderscore)(in JSONValue json)
 {
-    import std.typecons : staticIota;
-
     enum params = ParameterIdentifierTuple!(Ctor);
     alias defaults = ParameterDefaultValueTuple!(Ctor);
     alias Types = ParameterTypeTuple!(Ctor);
     Tuple!(Types) args;
-    foreach (i; staticIota!(0, params.length))
-    {
+    static foreach (i; 0 .. params.length)
+    {{
         enum paramName = params[i];
         if (paramName in json.object)
         {
@@ -535,7 +580,7 @@ T getInstanceFromCustomConstructor(T, alias Ctor, bool alsoAcceptUnderscore)(in 
                 args[i] = defaults[i];
             }
         }
-    }
+    }}
     static if (is(T == class))
     {
         return new T(args.expand);
@@ -548,40 +593,36 @@ T getInstanceFromCustomConstructor(T, alias Ctor, bool alsoAcceptUnderscore)(in 
 
 bool jsonValueHasAllFieldsNeeded(alias Ctor, bool alsoAcceptUnderscore)(in JSONValue json)
 {
-    import std.typecons : staticIota;
-
     enum params = ParameterIdentifierTuple!(Ctor);
     alias defaults = ParameterDefaultValueTuple!(Ctor);
     alias Types = ParameterTypeTuple!(Ctor);
     Tuple!(Types) args;
-    foreach (i; staticIota!(0, params.length))
-    {
+    static foreach (i; 0 .. params.length)
+    {{
         enum paramName = params[i];
         if (!((paramName in json.object) || ( alsoAcceptUnderscore && (camelCaseToUnderscore(paramName) in json.object))) && is(defaults[i] == void))
         {
             return false;
         }
-    }
+    }}
     return true;
 }
 
 ulong constructorOverloadScore(alias Ctor, bool alsoAcceptUnderscore)(in JSONValue json)
 {
-    import std.typecons : staticIota;
-
     enum params = ParameterIdentifierTuple!(Ctor);
     alias defaults = ParameterDefaultValueTuple!(Ctor);
     alias Types = ParameterTypeTuple!(Ctor);
     Tuple!(Types) args;
     ulong overloadScore = json.object.length;
-    foreach (i; staticIota!(0, params.length))
-    {
+    static foreach (i; 0 .. params.length)
+    {{
         enum paramName = params[i];
         if (paramName in json.object || ( alsoAcceptUnderscore && (camelCaseToUnderscore(paramName) in json.object)))
         {
             overloadScore--;
         }
-    }
+    }}
     return overloadScore;
 }
 
@@ -614,7 +655,7 @@ T fromJSON(T, SerializationOptions options = defaultSerializatonOptions)(in JSON
     }
     else 
     {
-        if (json.type == JSON_TYPE.NULL)
+        if (json.type == JSONType_null)
             return T.init;
         return defaultFromJSON!(T,options)(json);
     }
